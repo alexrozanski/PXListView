@@ -329,16 +329,11 @@
 	[[self documentView] setSubviews:[NSArray array]];
 
 	[self cacheCellLayout];
-	NSRange visibleRange = [self visibleRange];
+	[self addCellsFromVisibleRange];
 	
-	for(NSInteger i=visibleRange.location;i<NSMaxRange(visibleRange);i++) {
-		id cell = [[self delegate] listView:self cellForRow:i];
-		[[self documentView] addSubview:cell];
-		[cell setRow:i];
-		[_visibleCells addObject:cell];
-	}
+	_currentRange = [self visibleRange];
 	
-	[self layoutCells];
+	NSLog(@"%d", [_visibleCells count]);
 	
 	_inLiveResize = NO;
 }
