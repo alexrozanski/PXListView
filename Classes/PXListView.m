@@ -12,9 +12,9 @@
 #import "PXListViewCell+Private.h"
 
 @interface PXListView ()
+- (NSRect)contentViewRect;
 - (void)cacheCellLayout;
 - (void)layoutCells;
-- (NSRect)viewportRect;
 - (void)layoutCell:(PXListViewCell*)cell;
 - (void)addCellsFromVisibleRange;
 - (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row;
@@ -90,6 +90,13 @@
 #pragma mark -
 #pragma mark Cell Handling
 
+- (void)enqueueCell:(PXListViewCell*)cell
+{
+	[_reusableCells addObject:cell];
+	[_visibleCells removeObject:cell];
+	[cell removeFromSuperview];
+}
+
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier
 {
 	PXListViewCell *dequeuedCell = nil;
@@ -101,21 +108,40 @@
 		}
 	}
 	
+	//Make sure it doesn't get dealloc'd early
 	[dequeuedCell retain];
 	[_reusableCells removeObject:dequeuedCell];
 	
 	return [dequeuedCell autorelease];
 }
 
-- (PXListViewCell*)visibleCellForRow:(NSInteger)row
+- (NSRange)visibleRange
 {
-	for(id cell in _visibleCells) {
-		if([cell row]==row) {
-			return cell;
+	NSRect visibleRect = [[self contentView] documentVisibleRect];
+	NSInteger startRow = -1;
+	NSInteger endRow = -1;
+	
+	BOOL inRange = NO;
+	for(NSInteger i=0;i<_numberOfRows;i++) {
+		if(NSIntersectsRect([self rectOfRow:i], visibleRect)) {
+			if(startRow==-1) {
+				startRow = i;
+				inRange = YES;
+			}
+		}
+		else {
+			if(inRange) {
+				endRow = i;
+				break;
+			}
 		}
 	}
 	
-	return nil;
+	if(endRow==-1) {
+		endRow = _numberOfRows; 
+	}
+	
+	return NSMakeRange(startRow, endRow-startRow);
 }
 
 - (void)addCellsFromVisibleRange
@@ -127,45 +153,6 @@
 		[_visibleCells addObject:cell];
 		[self addNewVisibleCell:cell atRow:i];
 	}
-}
-
-- (NSRange)visibleRange
-{
-	NSRect visibleRect = [[self contentView] documentVisibleRect];
-	NSInteger startRange = -1;
-	NSInteger endRange = -1;
-	BOOL inRange = NO;
-	
-	for(NSInteger i=0;i<_numberOfRows;i++) {
-		if(NSIntersectsRect([self rectOfRow:i], visibleRect)) {
-			if(startRange==-1) {
-				startRange = i;
-				inRange = YES;
-			}
-		}
-		else {
-			if(inRange) {
-				endRange = i;
-				break;
-			}
-		}
-	}
-	
-	if(endRange==-1) {
-		endRange = _numberOfRows; 
-	}
-	
-	NSRange visibleRange = NSMakeRange(startRange, endRange-startRange);
-	
-	/*if(visibleRange.location>0) {
-		visibleRange.location--;
-		visibleRange.length++;
-	}
-	if(NSMaxRange(visibleRange)<_numberOfRows) {
-		visibleRange.length++;
-	}*/
-	
-	return visibleRange;
 }
 
 - (void)updateCells
@@ -228,13 +215,6 @@
 	_currentRange = visibleRange;
 }
 
-- (void)enqueueCell:(PXListViewCell*)cell
-{
-	[_reusableCells addObject:cell];
-	[_visibleCells removeObject:cell];
-	[cell removeFromSuperview];
-}
-
 - (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row
 {
 	[[self documentView] addSubview:cell];
@@ -245,12 +225,26 @@
 #pragma mark -
 #pragma mark Layout
 
+- (NSRect)contentViewRect
+{
+	NSRect frame = [self frame];
+	NSSize frameSize = NSMakeSize(NSWidth(frame), NSHeight(frame));
+	BOOL hasVertScroller = NSHeight(frame)<_totalHeight;
+	NSSize availableSize = [[self class] contentSizeForFrameSize:frameSize
+										   hasHorizontalScroller:NO
+											 hasVerticalScroller:hasVertScroller
+													  borderType:[self borderType]];
+	
+	return NSMakeRect(0, 0, availableSize.width, availableSize.height);
+}
+
 - (NSRect)rectOfRow:(NSInteger)row
 {
 	if([[self delegate] conformsToProtocol:@protocol(PXListViewDelegate)]) {
-		NSRect bounds = [self bounds];
+		NSRect contentViewRect = [self contentViewRect];
+		CGFloat rowHeight = [[self delegate] listView:self heightOfRow:row];
 		
-		return NSMakeRect(0, _cellYOffsets[row], NSWidth(bounds), [[self delegate] listView:self heightOfRow:row]);
+		return NSMakeRect(0, _cellYOffsets[row], NSWidth(contentViewRect), rowHeight);
 	}
 	
 	return NSZeroRect;
@@ -275,41 +269,27 @@
 	[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self bounds]), _totalHeight)];
 }
 
-- (NSRect)viewportRect
-{
-	NSRect frame = [self frame];
-	NSSize frameSize = NSMakeSize(NSWidth(frame), NSHeight(frame));
-	BOOL hasVertScroller = NSHeight(frame)<_totalHeight;
-	
-	NSSize availableSize = [NSScrollView contentSizeForFrameSize:frameSize
-										   hasHorizontalScroller:NO
-											 hasVerticalScroller:hasVertScroller
-													  borderType:[self borderType]];
-	
-	return NSMakeRect(0, 0, availableSize.width, availableSize.height);
-}
-
 - (void)layoutCells
-{
-	NSRect availableRect = [self viewportRect];
-	
+{	
 	//Set the frames of the cells
 	for(id cell in _visibleCells) {
 		NSInteger row = [cell row];
-		CGFloat cellHeight = [[self delegate] listView:self heightOfRow:row];
-		NSRect cellFrame = NSMakeRect(0, _cellYOffsets[row], NSWidth(availableRect), cellHeight);	
-		[cell setFrame:cellFrame];
+		[cell setFrame:[self rectOfRow:row]];
 	}
 }
 
 - (void)layoutCell:(PXListViewCell*)cell
 {
-	NSRect availableRect = [self viewportRect];	
-	
 	NSInteger row = [cell row];
-	CGFloat cellHeight = [[self delegate] listView:self heightOfRow:row];
-	NSRect cellFrame = NSMakeRect(0, _cellYOffsets[row], NSWidth(availableRect), cellHeight);	
-	[cell setFrame:cellFrame];
+	[cell setFrame:[self rectOfRow:row]];
+}
+
+#pragma mark -
+#pragma mark Scrolling
+
+- (void)contentViewBoundsDidChange:(NSNotification *)notification
+{
+	[self updateCells];
 }
 
 #pragma mark -
@@ -336,14 +316,6 @@
 	NSLog(@"%d", [_visibleCells count]);
 	
 	_inLiveResize = NO;
-}
-
-#pragma mark -
-#pragma mark Scrolling
-
-- (void)contentViewBoundsDidChange:(NSNotification *)notification
-{
-	[self updateCells];
 }
 
 @end
