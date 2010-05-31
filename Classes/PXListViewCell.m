@@ -7,10 +7,7 @@
 //
 
 #import "PXListViewCell.h"
-
-@interface PXListViewCell ()
-@property (readwrite) NSInteger row;
-@end
+#import "PXListViewCell+Private.h"
 
 #pragma mark -
 

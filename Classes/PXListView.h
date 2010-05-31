@@ -15,15 +15,22 @@
 	id <PXListViewDelegate> _delegate;
 	
 	NSMutableArray *_reusableCells;
+	NSMutableArray *_visibleCells;
 	
 	NSInteger _numberOfRows;
-	NSInteger _selectedRow;
+	
+	NSRange _visibleRange;
+	CGFloat _totalHeight;
+	CGFloat *_cellYOffsets;
+	
+	CGFloat _cellSpacing;
 }
 
-@property (readwrite, assign) id <PXListViewDelegate> delegate;
+@property (readwrite, assign) IBOutlet id <PXListViewDelegate> delegate;
+@property CGFloat cellSpacing;
 
 - (void)reloadData;
-
+- (NSRect)rectOfRow:(NSInteger)row;
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
 
 @end

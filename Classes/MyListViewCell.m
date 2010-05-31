@@ -11,17 +11,14 @@
 
 @implementation MyListViewCell
 
+@synthesize title;
+
 #pragma mark -
 #pragma mark Init/Dealloc
 
 - (id)initWithReusableIdentifier:(NSString*)identifier
 {
 	if(self = [super initWithReusableIdentifier:identifier]) {
-		titleLabel = [[NSTextField alloc] initWithFrame:[self frame]];
-		[titleLabel setStringValue:@"Hello"];
-		[titleLabel setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-		[self addSubview:titleLabel];
-		[titleLabel release];
 	}
 	
 	return self;
@@ -29,8 +26,22 @@
 
 - (void)dealloc
 {
-	[titleLabel removeFromSuperview];
+	[title release];
 	[super dealloc];
+}
+
+#pragma mark -
+#pragma mark Drawing
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+	[[NSColor redColor] set];
+	NSRectFill(dirtyRect);
+	
+	NSRect bounds = [self bounds];
+	NSSize titleSize = [title sizeWithAttributes:nil];
+	
+	[title drawAtPoint:NSMakePoint(NSMaxX(bounds)-titleSize.width, NSMaxY(bounds)-titleSize.height) withAttributes:nil];
 }
 
 @end

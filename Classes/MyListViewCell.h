@@ -11,7 +11,9 @@
 #import "PXListViewCell.h"
 
 @interface MyListViewCell : PXListViewCell {
-	NSTextField *titleLabel;
+	NSString *title;
 }
+
+@property (copy) NSString *title;
 
 @end

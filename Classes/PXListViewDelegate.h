@@ -10,10 +10,11 @@
 
 @class PXListView, PXListViewCell;
 
-@protocol PXListViewDelegate
+@protocol PXListViewDelegate <NSObject>
 
 @required
 - (NSInteger)numberOfRowsInListView:(PXListView*)aListView;
 - (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSInteger)row;
+- (NSInteger)listView:(PXListView*)aListView heightOfRow:(NSInteger)row;
 
 @end

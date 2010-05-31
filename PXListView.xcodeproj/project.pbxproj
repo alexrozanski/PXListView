@@ -43,6 +43,7 @@
 		D278592311B1BA6C00F1CF30 /* PXListDocumentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXListDocumentView.m; path = Classes/PXListDocumentView.m; sourceTree = "<group>"; };
 		D278596E11B1BBE800F1CF30 /* MyListViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyListViewCell.h; path = Classes/MyListViewCell.h; sourceTree = "<group>"; };
 		D278596F11B1BBE800F1CF30 /* MyListViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyListViewCell.m; path = Classes/MyListViewCell.m; sourceTree = "<group>"; };
+		D2B81A1111B2538800F84DF5 /* PXListViewCell+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PXListViewCell+Private.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +144,7 @@
 				D27858D711B1B6D400F1CF30 /* PXListViewDelegate.h */,
 				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
 				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
+				D2B81A1111B2538800F84DF5 /* PXListViewCell+Private.h */,
 				D278592911B1BA7900F1CF30 /* Private */,
 			);
 			name = PXListView;

@@ -12,6 +12,7 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, PXListViewDelegate> {
     IBOutlet NSWindow *window;
+	IBOutlet PXListView *listView;
 	
 	NSMutableArray *_listItems;
 }
