@@ -20,16 +20,12 @@
 	[listView setCellSpacing:2];
 	
 	_listItems = [[NSMutableArray alloc] init];
-	
-	[_listItems addObject:@"Hello1"];
-	[_listItems addObject:@"Hello2"];
-	[_listItems addObject:@"Hello3"];
-	[_listItems addObject:@"Hello4"];
-	[_listItems addObject:@"Hello5"];
-	[_listItems addObject:@"Hello6"];
-	[_listItems addObject:@"Hello7"];
-	[_listItems addObject:@"Hello8"];
-	[_listItems addObject:@"Hello9"];
+
+	for(NSInteger i=0;i<1000;i++) {
+		NSString *title = [[NSString alloc] initWithFormat:@"Item%d", i+1];
+		[_listItems addObject:title];
+		[title release];
+	}
 	
 	[listView reloadData];
 }

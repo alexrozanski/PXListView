@@ -16,7 +16,10 @@
 - (void)layoutCells;
 - (NSRect)viewportRect;
 - (void)layoutCell:(PXListViewCell*)cell;
+- (void)addCellsFromVisibleRange;
 - (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row;
+- (void)updateCells;
+- (void)enqueueCell:(PXListViewCell*)cell;
 @end
 
 
@@ -40,6 +43,7 @@
 
 - (void)awakeFromNib
 {
+	//Subscribe to scrolling notification
 	NSClipView *contentView = [self contentView];
 	[contentView setPostsBoundsChangedNotifications:YES];
 	
@@ -73,18 +77,11 @@
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
 		_numberOfRows = [delegate numberOfRowsInListView:self];
-		
 		[self cacheCellLayout];
 		
-		NSRect viewportRect = [self viewportRect];
-		for(NSInteger i=0;i<_numberOfRows;i++) {
-			if(NSIntersectsRect([self rectOfRow:i], viewportRect)) {
-				id cell = [[self delegate] listView:self cellForRow:i];
-				[[self documentView] addSubview:cell];
-				[cell setRow:i];
-				[_visibleCells addObject:cell];
-			}
-		}
+		NSRange visibleRange = [self visibleRange];
+		_currentRange = visibleRange;
+		[self addCellsFromVisibleRange];
 		
 		[self layoutCells];
 	}
@@ -121,61 +118,121 @@
 	return nil;
 }
 
-- (void)updateCells:(NSEvent*)event
+- (void)addCellsFromVisibleRange
 {
-	BOOL scrollUp = YES;
+	NSRange visibleRange = [self visibleRange];
 	
-	if([event deltaY]<0) {
-		scrollUp = NO;
+	for(NSInteger i=visibleRange.location;i<NSMaxRange(visibleRange);i++) {
+		id cell = [[self delegate] listView:self cellForRow:i];
+		[_visibleCells addObject:cell];
+		[self addNewVisibleCell:cell atRow:i];
 	}
+}
+
+- (NSRange)visibleRange
+{
+	NSRect visibleRect = [[self contentView] documentVisibleRect];
+	NSInteger startRange = -1;
+	NSInteger endRange = -1;
+	BOOL inRange = NO;
 	
-	NSRect visibleRect = [self documentVisibleRect];
-	
-	if(!scrollUp) 
-	{
-		id firstCell = [_visibleCells objectAtIndex:0];
-		NSRect cellFrame = [self rectOfRow:[firstCell row]];
-		
-		if(!NSIntersectsRect(cellFrame, visibleRect)) {
-			[_reusableCells addObject:firstCell];
-			[_visibleCells removeObject:firstCell];
-			[firstCell removeFromSuperview];
-		}
-		
-		NSInteger newRow = [[_visibleCells lastObject] row]+1;
-		
-		if(newRow<=_numberOfRows) {
-			NSRect newCellFrame = [self rectOfRow:newRow];
-			
-			if(NSIntersectsRect(newCellFrame, visibleRect)) {
-				PXListViewCell *newCell = [[self delegate] listView:self cellForRow:newRow];
-				[_visibleCells addObject:newCell];
-				[self addNewVisibleCell:newCell atRow:newRow];
+	for(NSInteger i=0;i<_numberOfRows;i++) {
+		if(NSIntersectsRect([self rectOfRow:i], visibleRect)) {
+			if(startRange==-1) {
+				startRange = i;
+				inRange = YES;
 			}
 		}
+		else {
+			if(inRange) {
+				endRange = i;
+				break;
+			}
+		}
+	}
+	
+	if(endRange==-1) {
+		endRange = _numberOfRows; 
+	}
+	
+	NSRange visibleRange = NSMakeRange(startRange, endRange-startRange);
+	
+	/*if(visibleRange.location>0) {
+		visibleRange.location--;
+		visibleRange.length++;
+	}
+	if(NSMaxRange(visibleRange)<_numberOfRows) {
+		visibleRange.length++;
+	}*/
+	
+	return visibleRange;
+}
+
+- (void)updateCells
+{	
+	if(_inLiveResize) {
+		return;
+	}
+	
+	NSRange visibleRange = [self visibleRange];
+	NSRange intersectionRange = NSIntersectionRange(visibleRange, _currentRange);
+	
+	if(visibleRange.location==_currentRange.location&&
+	   NSMaxRange(visibleRange)==NSMaxRange(_currentRange)) {
+		return;
+	}
+	
+	if(intersectionRange.location==0&&intersectionRange.length==0) {
+		//We'll have to rebuild all the cells
+		[_reusableCells addObjectsFromArray:_visibleCells];
+		[_visibleCells removeAllObjects];
+		[[self documentView] setSubviews:[NSArray array]];
+		[self addCellsFromVisibleRange];
 	}
 	else {
-		id lastCell = [_visibleCells lastObject];
-		NSRect cellFrame = [self rectOfRow:[lastCell row]];
-		
-		if(!NSIntersectsRect(cellFrame, visibleRect)) {
-			[_reusableCells addObject:lastCell];
-			[_visibleCells removeObject:lastCell];
-			[lastCell removeFromSuperview];
+		if(visibleRange.location<_currentRange.location) { //Add top 
+			for(NSInteger i=_currentRange.location;i>visibleRange.location;i--)
+			{
+				NSInteger newRow = i-1;
+				PXListViewCell *cell = [[self delegate] listView:self cellForRow:newRow];
+				[_visibleCells insertObject:cell atIndex:0];
+				[self addNewVisibleCell:cell atRow:newRow];
+			}
+		}
+		else if(visibleRange.location>_currentRange.location) { //Remove top
+			for(NSInteger i=visibleRange.location;i>_currentRange.location;i--) {
+				PXListViewCell *firstCell = [_visibleCells objectAtIndex:0];
+				[self enqueueCell:firstCell];
+			}
 		}
 		
-		NSInteger newRow = [[_visibleCells objectAtIndex:0] row]-1;
-		
-		if(newRow>=0) {
-			NSRect newCellFrame = [self rectOfRow:newRow];
-			
-			if(NSIntersectsRect(newCellFrame, visibleRect)) {
-				PXListViewCell *newCell = [[self delegate] listView:self cellForRow:newRow];
-				[_visibleCells insertObject:newCell atIndex:0];
-				[self addNewVisibleCell:newCell atRow:newRow];
+		if(NSMaxRange(visibleRange)>NSMaxRange(_currentRange)) { //Add bottom
+			for(NSInteger i=NSMaxRange(_currentRange);i<NSMaxRange(visibleRange);i++)
+			{
+				NSInteger newRow = i;
+				PXListViewCell *cell = [[self delegate] listView:self cellForRow:newRow];
+				[_visibleCells addObject:cell];
+				[self addNewVisibleCell:cell atRow:newRow];
+			}
+		}
+		else if(NSMaxRange(visibleRange)<NSMaxRange(_currentRange)) { //Remove bottom
+			for(NSInteger i=NSMaxRange(_currentRange);i>NSMaxRange(visibleRange);i--) {
+				PXListViewCell *lastCell = [_visibleCells lastObject];
+				[self enqueueCell:lastCell];
 			}
 		}
 	}
+	
+	NSLog(@"%d", [_visibleCells count]);
+	
+	_currentRange = visibleRange;
+}
+
+- (void)enqueueCell:(PXListViewCell*)cell
+{
+	[_reusableCells addObject:cell];
+	[_visibleCells removeObject:cell];
+	[cell removeFromSuperview];
 }
 
 - (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row
@@ -258,6 +315,11 @@
 #pragma mark -
 #pragma mark Sizing
 
+- (void)viewWillStartLiveResize
+{
+	_inLiveResize = YES;
+}
+
 - (void)viewDidEndLiveResize
 {
 	[super viewDidEndLiveResize];
@@ -265,33 +327,28 @@
 	//Change the layout of the cells
 	[_visibleCells removeAllObjects];
 	[[self documentView] setSubviews:[NSArray array]];
-	NSRect viewportRect = [self viewportRect];
 
 	[self cacheCellLayout];
+	NSRange visibleRange = [self visibleRange];
 	
-	for(NSInteger i=0;i<_numberOfRows;i++) {
-		if(NSIntersectsRect([self rectOfRow:i], viewportRect)) {
-			id cell = [[self delegate] listView:self cellForRow:i];
-			[[self documentView] addSubview:cell];
-			[cell setRow:i];
-			[_visibleCells addObject:cell];
-		}
+	for(NSInteger i=visibleRange.location;i<NSMaxRange(visibleRange);i++) {
+		id cell = [[self delegate] listView:self cellForRow:i];
+		[[self documentView] addSubview:cell];
+		[cell setRow:i];
+		[_visibleCells addObject:cell];
 	}
 	
 	[self layoutCells];
+	
+	_inLiveResize = NO;
 }
 
 #pragma mark -
 #pragma mark Scrolling
 
-- (void)scrollWheel:(NSEvent *)theEvent
-{
-	[super scrollWheel:theEvent];
-	[self updateCells:theEvent];
-}
-
 - (void)contentViewBoundsDidChange:(NSNotification *)notification
 {
+	[self updateCells];
 }
 
 @end

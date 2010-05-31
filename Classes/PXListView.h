@@ -16,6 +16,7 @@
 	
 	NSMutableArray *_reusableCells;
 	NSMutableArray *_visibleCells;
+	NSRange _currentRange;
 	
 	NSInteger _numberOfRows;
 	
@@ -24,6 +25,8 @@
 	CGFloat *_cellYOffsets;
 	
 	CGFloat _cellSpacing;
+	
+	BOOL _inLiveResize;
 }
 
 @property (readwrite, assign) IBOutlet id <PXListViewDelegate> delegate;
@@ -31,6 +34,7 @@
 
 - (void)reloadData;
 - (NSRect)rectOfRow:(NSInteger)row;
+- (NSRange)visibleRange;
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
 
 @end
