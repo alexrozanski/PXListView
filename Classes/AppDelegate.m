@@ -10,6 +10,8 @@
 
 #import "MyListViewCell.h"
 
+#define LISTVIEW_CELL_IDENTIFIER		@"MyListViewCell"
+
 @implementation AppDelegate
 
 #pragma mark -
@@ -21,8 +23,9 @@
 	
 	_listItems = [[NSMutableArray alloc] init];
 
+	//Create 1000 rows as a test
 	for(NSInteger i=0;i<1000;i++) {
-		NSString *title = [[NSString alloc] initWithFormat:@"Item%d", i+1];
+		NSString *title = [[NSString alloc] initWithFormat:@"Item%d", i+1]; //We're in a tight loop
 		[_listItems addObject:title];
 		[title release];
 	}
@@ -46,12 +49,13 @@
 
 - (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSInteger)row
 {
-	MyListViewCell *cell = (MyListViewCell*)[aListView dequeueCellWithReusableIdentifier:@"MyListViewCell"];
+	MyListViewCell *cell = (MyListViewCell*)[aListView dequeueCellWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER];
 	
 	if(!cell) {
-		cell = [[MyListViewCell alloc] initWithReusableIdentifier:@"MyListViewCell"];
+		cell = [[[MyListViewCell alloc] initWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER] autorelease];
 	}
 	
+	//Set up the new cell
 	[cell setTitle:[_listItems objectAtIndex:row]];
 	
 	return cell;
