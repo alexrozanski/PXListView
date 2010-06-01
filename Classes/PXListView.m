@@ -240,7 +240,7 @@
 		}
 	}
 	
-	NSLog(@"%d", [_visibleCells count]);
+	NSLog(@"No of cells in view hierarchy: %d", [_visibleCells count]);
 	
 	_currentRange = visibleRange;
 }
@@ -352,7 +352,7 @@
 	
 	_currentRange = [self visibleRange];
 	
-	NSLog(@"%d", [_visibleCells count]);
+	NSLog(@"No of cells in view hierarchy: %d", [_visibleCells count]);
 	
 	_inLiveResize = NO;
 }
