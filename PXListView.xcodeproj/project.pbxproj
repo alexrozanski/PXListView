@@ -45,6 +45,7 @@
 		D278596E11B1BBE800F1CF30 /* MyListViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyListViewCell.h; path = Classes/MyListViewCell.h; sourceTree = "<group>"; };
 		D278596F11B1BBE800F1CF30 /* MyListViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyListViewCell.m; path = Classes/MyListViewCell.m; sourceTree = "<group>"; };
 		D279A64311B4E95600771B2A /* PXListView+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PXListView+Private.h"; path = "Classes/PXListView+Private.h"; sourceTree = "<group>"; };
+		D279A65E11B4EB1200771B2A /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; };
 		D2B81A1111B2538800F84DF5 /* PXListViewCell+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PXListViewCell+Private.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,6 +102,7 @@
 		29B97314FDCFA39411CA2CEA /* PXListView */ = {
 			isa = PBXGroup;
 			children = (
+				D279A65E11B4EB1200771B2A /* README.markdown */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -145,15 +147,13 @@
 				D27858D111B1B5EA00F1CF30 /* PXListView.m */,
 				D279A64311B4E95600771B2A /* PXListView+Private.h */,
 				D27858D711B1B6D400F1CF30 /* PXListViewDelegate.h */,
-				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
-				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
-				D2B81A1111B2538800F84DF5 /* PXListViewCell+Private.h */,
-				D278592911B1BA7900F1CF30 /* Private */,
+				D279A68911B4ECAB00771B2A /* Cells */,
+				D278592911B1BA7900F1CF30 /* Misc */,
 			);
 			name = PXListView;
 			sourceTree = "<group>";
 		};
-		D278592911B1BA7900F1CF30 /* Private */ = {
+		D278592911B1BA7900F1CF30 /* Misc */ = {
 			isa = PBXGroup;
 			children = (
 				D278591C11B1BA4E00F1CF30 /* PXListClipView.h */,
@@ -161,7 +161,17 @@
 				D278592211B1BA6C00F1CF30 /* PXListDocumentView.h */,
 				D278592311B1BA6C00F1CF30 /* PXListDocumentView.m */,
 			);
-			name = Private;
+			name = Misc;
+			sourceTree = "<group>";
+		};
+		D279A68911B4ECAB00771B2A /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
+				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
+				D2B81A1111B2538800F84DF5 /* PXListViewCell+Private.h */,
+			);
+			name = Cells;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
