@@ -139,12 +139,17 @@
 
 - (void)addCellsFromVisibleRange
 {
-	NSRange visibleRange = [self visibleRange];
+	id <PXListViewDelegate> delegate = [self delegate];
 	
-	for(NSInteger i=visibleRange.location;i<NSMaxRange(visibleRange);i++) {
-		id cell = [[self delegate] listView:self cellForRow:i];
-		[_visibleCells addObject:cell];
-		[self addNewVisibleCell:cell atRow:i];
+	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
+	{
+		NSRange visibleRange = [self visibleRange];
+		
+		for(NSInteger i=visibleRange.location;i<NSMaxRange(visibleRange);i++) {
+			id cell = [delegate listView:self cellForRow:i];
+			[_visibleCells addObject:cell];
+			[self addNewVisibleCell:cell atRow:i];
+		}
 	}
 }
 
@@ -234,9 +239,12 @@
 
 - (NSRect)rectOfRow:(NSInteger)row
 {
-	if([[self delegate] conformsToProtocol:@protocol(PXListViewDelegate)]) {
+	id <PXListViewDelegate> delegate = [self delegate];
+
+	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
+	{
 		NSRect contentViewRect = [self contentViewRect];
-		CGFloat rowHeight = [[self delegate] listView:self heightOfRow:row];
+		CGFloat rowHeight = [delegate listView:self heightOfRow:row];
 		
 		return NSMakeRect(0, _cellYOffsets[row], NSWidth(contentViewRect), rowHeight);
 	}
@@ -246,21 +254,26 @@
 
 - (void)cacheCellLayout
 {
-	CGFloat totalHeight = 0;
+	id <PXListViewDelegate> delegate = [self delegate];
 	
-	//Allocate the offset caching array
-	_cellYOffsets = (CGFloat*)malloc(sizeof(CGFloat)*_numberOfRows);
-	
-	for(NSInteger i=0;i<_numberOfRows;i++) {
-		_cellYOffsets[i] = totalHeight;
-		CGFloat cellHeight = [[self delegate] listView:self heightOfRow:i];
-		
-		totalHeight+=cellHeight+[self cellSpacing];
+	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
+	{
+		CGFloat totalHeight = 0;
+
+		//Allocate the offset caching array
+		_cellYOffsets = (CGFloat*)malloc(sizeof(CGFloat)*_numberOfRows);
+
+		for(NSInteger i=0;i<_numberOfRows;i++) {
+			_cellYOffsets[i] = totalHeight;
+			CGFloat cellHeight = [delegate listView:self heightOfRow:i];
+			
+			totalHeight+=cellHeight+[self cellSpacing];
+		}
+
+		_totalHeight = totalHeight;
+
+		[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self bounds]), _totalHeight)];
 	}
-	
-	_totalHeight = totalHeight;
-	
-	[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self bounds]), _totalHeight)];
 }
 
 - (void)layoutCells
