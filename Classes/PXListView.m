@@ -7,20 +7,10 @@
 //
 
 #import "PXListView.h"
+#import "PXListView+Private.h"
 
 #import "PXListViewCell.h"
 #import "PXListViewCell+Private.h"
-
-@interface PXListView ()
-- (NSRect)contentViewRect;
-- (void)cacheCellLayout;
-- (void)layoutCells;
-- (void)layoutCell:(PXListViewCell*)cell;
-- (void)addCellsFromVisibleRange;
-- (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row;
-- (void)updateCells;
-- (void)enqueueCell:(PXListViewCell*)cell;
-@end
 
 
 @implementation PXListView
@@ -218,6 +208,7 @@
 - (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row
 {
 	[[self documentView] addSubview:cell];
+	[cell setListView:self];
 	[cell setRow:row];
 	[self layoutCell:cell];
 }

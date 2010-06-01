@@ -33,8 +33,10 @@
 @property CGFloat cellSpacing;
 
 - (void)reloadData;
-- (NSRect)rectOfRow:(NSInteger)row;
-- (NSRange)visibleRange;
+
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
+
+- (NSRange)visibleRange;
+- (NSRect)rectOfRow:(NSInteger)row;
 
 @end

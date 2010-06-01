@@ -17,6 +17,7 @@
 		D278591E11B1BA4E00F1CF30 /* PXListClipView.m in Sources */ = {isa = PBXBuildFile; fileRef = D278591D11B1BA4E00F1CF30 /* PXListClipView.m */; };
 		D278592411B1BA6C00F1CF30 /* PXListDocumentView.m in Sources */ = {isa = PBXBuildFile; fileRef = D278592311B1BA6C00F1CF30 /* PXListDocumentView.m */; };
 		D278597011B1BBE800F1CF30 /* MyListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D278596F11B1BBE800F1CF30 /* MyListViewCell.m */; };
+		D279A64411B4E95600771B2A /* PXListView+Private.h in Resources */ = {isa = PBXBuildFile; fileRef = D279A64311B4E95600771B2A /* PXListView+Private.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		D278592311B1BA6C00F1CF30 /* PXListDocumentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PXListDocumentView.m; path = Classes/PXListDocumentView.m; sourceTree = "<group>"; };
 		D278596E11B1BBE800F1CF30 /* MyListViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyListViewCell.h; path = Classes/MyListViewCell.h; sourceTree = "<group>"; };
 		D278596F11B1BBE800F1CF30 /* MyListViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyListViewCell.m; path = Classes/MyListViewCell.m; sourceTree = "<group>"; };
+		D279A64311B4E95600771B2A /* PXListView+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PXListView+Private.h"; path = "Classes/PXListView+Private.h"; sourceTree = "<group>"; };
 		D2B81A1111B2538800F84DF5 /* PXListViewCell+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "PXListViewCell+Private.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +143,7 @@
 			children = (
 				D27858D011B1B5EA00F1CF30 /* PXListView.h */,
 				D27858D111B1B5EA00F1CF30 /* PXListView.m */,
+				D279A64311B4E95600771B2A /* PXListView+Private.h */,
 				D27858D711B1B6D400F1CF30 /* PXListViewDelegate.h */,
 				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
 				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
@@ -206,6 +209,7 @@
 			files = (
 				D26669D211B1B302007597F1 /* InfoPlist.strings in Resources */,
 				D26669D311B1B302007597F1 /* MainMenu.xib in Resources */,
+				D279A64411B4E95600771B2A /* PXListView+Private.h in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
