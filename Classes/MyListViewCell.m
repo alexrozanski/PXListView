@@ -43,13 +43,16 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-	[[NSColor redColor] set];
-	NSRectFill(dirtyRect);
-	
 	NSRect bounds = [self bounds];
-	NSSize titleSize = [title sizeWithAttributes:nil];
 	
-	[title drawAtPoint:NSMakePoint(NSMaxX(bounds)-titleSize.width, NSMaxY(bounds)-titleSize.height) withAttributes:nil];
+	//Do a white fill and a black stroke
+	[[NSColor whiteColor] set];
+	NSRectFill(dirtyRect);
+	[[NSColor blackColor] set];
+	NSFrameRect(bounds);
+	
+	NSSize titleSize = [title sizeWithAttributes:nil];
+	[title drawAtPoint:NSMakePoint(0, NSMaxY(bounds)-titleSize.height) withAttributes:nil];
 }
 
 @end
