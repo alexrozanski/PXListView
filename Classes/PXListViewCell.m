@@ -35,4 +35,11 @@
 	[super dealloc];
 }
 
+#pragma mark -
+#pragma mark Reusing Cells
+
+- (void)prepareForReuse
+{
+}
+
 @end

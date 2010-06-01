@@ -22,5 +22,6 @@
 @property (readonly) NSInteger row;
 
 - (id)initWithReusableIdentifier:(NSString*)identifier;
+- (void)prepareForReuse;
 
 @end
