@@ -19,6 +19,7 @@
 	NSRange _currentRange;
 	
 	NSInteger _numberOfRows;
+	NSInteger _selectedRow;
 	
 	NSRange _visibleRange;
 	CGFloat _totalHeight;
@@ -31,6 +32,7 @@
 
 @property (readwrite, assign) IBOutlet id <PXListViewDelegate> delegate;
 @property CGFloat cellSpacing;
+@property NSInteger selectedRow;
 
 - (void)reloadData;
 

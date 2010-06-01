@@ -9,6 +9,8 @@
 #import "PXListViewCell.h"
 #import "PXListViewCell+Private.h"
 
+#import "PXListView.h"
+
 #pragma mark -
 
 @implementation PXListViewCell
@@ -33,6 +35,20 @@
 {
 	[_reusableIdentifier release];
 	[super dealloc];
+}
+
+#pragma mark -
+#pragma mark Handling Selection
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	PXListView *listView = [self listView];
+	[listView setSelectedRow:[self row]];
+}
+
+- (BOOL)isSelected
+{
+	return [self row]==[[self listView] selectedRow];
 }
 
 #pragma mark -

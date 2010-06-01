@@ -15,6 +15,7 @@
 
 - (void)addCellsFromVisibleRange;
 - (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row;
+- (PXListViewCell*)visibleCellForRow:(NSInteger)row;
 
 - (void)updateCells;
 

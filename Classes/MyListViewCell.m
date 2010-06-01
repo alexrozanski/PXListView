@@ -44,15 +44,24 @@
 - (void)drawRect:(NSRect)dirtyRect
 {
 	NSRect bounds = [self bounds];
+	NSDictionary *attributes = nil;
 	
-	//Do a white fill and a black stroke
-	[[NSColor whiteColor] set];
+	//Draw the border and background
+	if([self isSelected]) {
+		[[NSColor redColor] set];
+		attributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor whiteColor], NSForegroundColorAttributeName, nil];
+	}
+	else {
+		[[NSColor whiteColor] set];
+	}
 	NSRectFill(dirtyRect);
 	[[NSColor blackColor] set];
 	NSFrameRect(bounds);
 	
-	NSSize titleSize = [title sizeWithAttributes:nil];
-	[title drawAtPoint:NSMakePoint(0, NSMaxY(bounds)-titleSize.height) withAttributes:nil];
+	//Draw the title
+	NSSize titleSize = [title sizeWithAttributes:attributes];
+	[title drawAtPoint:NSMakePoint(5, NSMaxY(bounds)-titleSize.height-5) withAttributes:attributes];
+	[attributes release];
 }
 
 @end

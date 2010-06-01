@@ -17,6 +17,7 @@
 
 @synthesize delegate = _delegate;
 @synthesize cellSpacing = _cellSpacing;
+@synthesize selectedRow = _selectedRow;
 
 #pragma mark -
 #pragma mark Init/Dealloc
@@ -64,6 +65,8 @@
 	[_visibleCells removeAllObjects];
 	free(_cellYOffsets);
 	
+	_selectedRow = -1;
+	
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
 		_numberOfRows = [delegate numberOfRowsInListView:self];
@@ -75,6 +78,21 @@
 		
 		[self layoutCells];
 	}
+}
+
+- (void)setSelectedRow:(NSInteger)row
+{
+	NSInteger oldSelectedRow = _selectedRow;
+	
+	if(oldSelectedRow>=_currentRange.location&&oldSelectedRow<=NSMaxRange(_currentRange)) {
+		PXListViewCell *oldSelectedCell = [self visibleCellForRow:oldSelectedRow];
+		[oldSelectedCell setNeedsDisplay:YES];
+	}
+	
+	PXListViewCell *newSelectedCell = [self visibleCellForRow:row];
+	[newSelectedCell setNeedsDisplay:YES];
+	
+	_selectedRow = row;
 }
 
 #pragma mark -
@@ -135,6 +153,20 @@
 	}
 	
 	return NSMakeRange(startRow, endRow-startRow);
+}
+
+- (PXListViewCell*)visibleCellForRow:(NSInteger)row
+{
+	PXListViewCell *theCell = nil;
+	
+	for(id cell in _visibleCells) {
+		if([cell row]==row) {
+			theCell = cell;
+			break;
+		}
+	}
+	
+	return theCell;
 }
 
 - (void)addCellsFromVisibleRange

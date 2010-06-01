@@ -20,6 +20,7 @@
 @property (assign) PXListView *listView;
 @property (readonly) NSString *reusableIdentifier;
 @property (readonly) NSInteger row;
+@property (readonly,getter=isSelected) BOOL selected;
 
 - (id)initWithReusableIdentifier:(NSString*)identifier;
 - (void)prepareForReuse;
