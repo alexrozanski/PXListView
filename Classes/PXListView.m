@@ -98,9 +98,12 @@
 		}
 	}
 	
-	//Make sure it doesn't get dealloc'd early
-	[dequeuedCell retain];
-	[_reusableCells removeObject:dequeuedCell];
+	if(dequeuedCell!=nil) {
+		//Make sure it doesn't get dealloc'd early
+		[dequeuedCell retain];
+		[_reusableCells removeObject:dequeuedCell];
+		[dequeuedCell prepareForReuse];
+	}
 	
 	return [dequeuedCell autorelease];
 }

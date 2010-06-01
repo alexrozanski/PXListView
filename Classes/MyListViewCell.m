@@ -31,6 +31,14 @@
 }
 
 #pragma mark -
+#pragma mark Reuse
+
+- (void)prepareForReuse
+{
+	[title release], title=nil;
+}
+
+#pragma mark -
 #pragma mark Drawing
 
 - (void)drawRect:(NSRect)dirtyRect
