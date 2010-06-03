@@ -29,7 +29,13 @@ When responding to `-listView:cellForRow:`, the delegate should first call `-deq
 
 You should create a concrete subclass of `PXListViewCell` when using it in the list view, where `drawRect:` can be overridden to do custom drawing, and properties used to store data for the cell can be declared on this subclass. The example project (as part of the repository) shows this.
 
+Attributions
+-----------
+
+Thanks to [Mike Abdullah][4] for optimizations related to cell dequeuing.
+
 
   [1]: http://perspx.com/blog/archives/1427/making-list-views-really-fast/
   [2]: http://www.atebits.com/tweetie-mac/
   [3]: http://www.echofon.com/twitter/mac/
+  [4]: http://mikeabdullah.net/

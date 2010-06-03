@@ -107,23 +107,26 @@
 
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier
 {
-	PXListViewCell *dequeuedCell = nil;
-	
-	for(id cell in _reusableCells) {
-		if([[cell reusableIdentifier] isEqual:identifier]) {
-			dequeuedCell = cell;
-			break;
+	if([_reusableCells count]==0) {
+		return nil;
+	}
+
+	//Search backwards looking for a match since removing from end of array is generally quicker
+	for(NSUInteger i = [_reusableCells count]-1; i>=0;i--)
+	{
+		PXListViewCell *cell = [_reusableCells objectAtIndex:i];
+		
+		if([[cell reusableIdentifier] isEqualToString:identifier])
+		{
+			//Make sure it doesn't get dealloc'd early
+			[cell retain];            
+			[_reusableCells removeObjectAtIndex:i];
+			[cell prepareForReuse];
+			return [cell autorelease];
 		}
 	}
 	
-	if(dequeuedCell!=nil) {
-		//Make sure it doesn't get dealloc'd early
-		[dequeuedCell retain];
-		[_reusableCells removeObject:dequeuedCell];
-		[dequeuedCell prepareForReuse];
-	}
-	
-	return [dequeuedCell autorelease];
+	return nil;
 }
 
 - (NSRange)visibleRange
