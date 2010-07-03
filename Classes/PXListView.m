@@ -318,6 +318,9 @@
 		NSInteger row = [cell row];
 		[cell setFrame:[self rectOfRow:row]];
 	}
+	
+	//Set the new height of the document view
+	[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self contentViewRect]), _totalHeight)];
 }
 
 - (void)layoutCell:(PXListViewCell*)cell
