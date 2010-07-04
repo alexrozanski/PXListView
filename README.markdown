@@ -3,6 +3,8 @@ PXListView
 
 An optimized list view control for Mac OS X 10.5 and greater. It was created after I wrote [this post][1] on the subject.
 
+PXListView is licensed under the New BSD license.
+
 `PXListView` uses similar optimizations as `UITableView` for the iPhone, by enqueuing and dequeuing `NSView`s which are used to display rows, in order to keep a low memory footprint when there are a large number of rows in the list, yet still allowing each row to be represented  by an `NSView`, which is easier than dealing with cells.
 
 The architecture of the control is based on the list view controls which are present in both [Tweetie][2] (Mac) and [Echofon][3] (Mac).
