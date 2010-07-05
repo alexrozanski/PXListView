@@ -354,7 +354,13 @@
 	[super resizeWithOldSuperviewSize:oldBoundsSize];
 	
 	if(!_inLiveResize) {
-		[self layoutCells];
+		[_visibleCells removeAllObjects];
+		[[self documentView] setSubviews:[NSArray array]];
+		
+		[self cacheCellLayout];
+		[self addCellsFromVisibleRange];
+		
+		_currentRange = [self visibleRange];
 	}
 }
 
