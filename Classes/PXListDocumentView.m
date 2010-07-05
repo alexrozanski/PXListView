@@ -8,12 +8,20 @@
 
 #import "PXListDocumentView.h"
 
+#import "PXListView.h"
 
 @implementation PXListDocumentView
+
+@synthesize listView;
 
 - (BOOL)isFlipped
 {
 	return YES;
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	[[self listView] deselectRows];
 }
 
 @end

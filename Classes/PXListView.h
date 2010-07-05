@@ -40,5 +40,6 @@
 
 - (NSRange)visibleRange;
 - (NSRect)rectOfRow:(NSInteger)row;
+- (void)deselectRows;
 
 @end

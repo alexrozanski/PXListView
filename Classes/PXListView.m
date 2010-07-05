@@ -42,6 +42,9 @@
 											 selector:@selector(contentViewBoundsDidChange:)
 												 name:NSViewBoundsDidChangeNotification
 											   object:contentView];
+	
+	//Tag ourselves onto the document view
+	[[self documentView] setListView:self];
 }
 
 - (void)dealloc
@@ -95,6 +98,15 @@
 	_selectedRow = row;
 }
 
+- (void)deselectRows
+{
+	NSInteger oldSelectedRow = _selectedRow ;
+	_selectedRow = -1;
+	
+	PXListViewCell *oldSelectedCell = [self visibleCellForRow:oldSelectedRow];
+	[oldSelectedCell setNeedsDisplay:YES];
+}
+
 #pragma mark -
 #pragma mark Cell Handling
 
@@ -110,7 +122,7 @@
 	if([_reusableCells count]==0) {
 		return nil;
 	}
-
+	
 	//Search backwards looking for a match since removing from end of array is generally quicker
 	for(NSUInteger i = [_reusableCells count]-1; i>=0;i--)
 	{
@@ -275,7 +287,7 @@
 - (NSRect)rectOfRow:(NSInteger)row
 {
 	id <PXListViewDelegate> delegate = [self delegate];
-
+	
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
 		NSRect contentViewRect = [self contentViewRect];
@@ -294,19 +306,19 @@
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
 		CGFloat totalHeight = 0;
-
+		
 		//Allocate the offset caching array
 		_cellYOffsets = (CGFloat*)malloc(sizeof(CGFloat)*_numberOfRows);
-
+		
 		for(NSInteger i=0;i<_numberOfRows;i++) {
 			_cellYOffsets[i] = totalHeight;
 			CGFloat cellHeight = [delegate listView:self heightOfRow:i];
 			
 			totalHeight+=cellHeight+[self cellSpacing];
 		}
-
+		
 		_totalHeight = totalHeight;
-
+		
 		NSRect bounds = [self bounds];
 		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
 		
@@ -358,13 +370,11 @@
 	//Change the layout of the cells
 	[_visibleCells removeAllObjects];
 	[[self documentView] setSubviews:[NSArray array]];
-
+	
 	[self cacheCellLayout];
 	[self addCellsFromVisibleRange];
 	
 	_currentRange = [self visibleRange];
-	
-	NSLog(@"No of cells in view hierarchy: %d", [_visibleCells count]);
 	
 	_inLiveResize = NO;
 }

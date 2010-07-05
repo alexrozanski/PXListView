@@ -8,9 +8,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class PXListView;
 
 @interface PXListDocumentView : NSView {
-
+	PXListView *listView;
 }
+
+@property (assign) PXListView *listView;
 
 @end
