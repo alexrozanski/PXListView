@@ -307,7 +307,10 @@
 
 		_totalHeight = totalHeight;
 
-		[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self bounds]), _totalHeight)];
+		NSRect bounds = [self bounds];
+		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
+		
+		[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self bounds]), documentHeight)];
 	}
 }
 
@@ -319,8 +322,11 @@
 		[cell setFrame:[self rectOfRow:row]];
 	}
 	
+	NSRect bounds = [self bounds];
+	CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
+	
 	//Set the new height of the document view
-	[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self contentViewRect]), _totalHeight)];
+	[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self contentViewRect]), documentHeight)];
 }
 
 - (void)layoutCell:(PXListViewCell*)cell
