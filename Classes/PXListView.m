@@ -347,6 +347,14 @@
 	[cell setFrame:[self rectOfRow:row]];
 }
 
+- (void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize
+{
+	//If our frame is autosized (not dragged using the sizing handle), we can handle this
+	//message to resize the visible cells
+	[super resizeWithOldSuperviewSize:oldBoundsSize];
+	[self layoutCells];
+}
+
 #pragma mark -
 #pragma mark Scrolling
 
