@@ -174,7 +174,7 @@
 {
 	[_reusableCells addObject:cell];
 	[_visibleCells removeObject:cell];
-	[cell removeFromSuperview];
+	[cell setHidden: YES];
 }
 
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier
@@ -345,6 +345,7 @@
 	[cell setListView:self];
 	[cell setRow:row];
 	[self layoutCell:cell];
+	[cell setHidden: NO];
 }
 
 
