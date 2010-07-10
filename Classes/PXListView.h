@@ -52,4 +52,6 @@
 - (void)			selectRowIndexes:(NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend;
 - (void)			deselectRowIndexes: (NSIndexSet*)rows;
 
+- (void)			scrollRowToVisible: (NSInteger)row;
+
 @end

@@ -230,25 +230,27 @@
 	return NSMakeRange(startRow, endRow-startRow);
 }
 
-- (PXListViewCell*)visibleCellForRow:(NSInteger)row
+-(PXListViewCell*)	visibleCellForRow: (NSInteger)row
 {
-	PXListViewCell *theCell = nil;
+	PXListViewCell *outCell = nil;
 	
-	for(id cell in _visibleCells) {
-		if([cell row]==row) {
-			theCell = cell;
+	for( PXListViewCell* cell in _visibleCells )
+	{
+		if( [cell row] == row )
+		{
+			outCell = cell;
 			break;
 		}
 	}
 	
-	return theCell;
+	return outCell;
 }
 
 -(NSArray*)	visibleCellsForRowIndexes: (NSIndexSet*)rows
 {
 	NSMutableArray		*theCells = [NSMutableArray array];
 	
-	for( id cell in _visibleCells )
+	for( PXListViewCell* cell in _visibleCells )
 	{
 		if( [rows containsIndex: [cell row]] )
 		{
@@ -392,6 +394,73 @@
 	// else if ( !_allowsEmptySelection and _numberOfRows <=1 )
 	//	Nothing to do. Can't unselect last or no item.
 }
+
+#pragma mark -
+#pragma mark Keyboard Handling
+
+
+-(BOOL)	canBecomeKeyView
+{
+	return YES;
+}
+
+
+-(BOOL)	acceptsFirstResponder
+{
+	return YES;
+}
+
+- (BOOL)becomeFirstResponder
+{
+	return YES;
+}
+
+
+- (BOOL)resignFirstResponder
+{
+	return YES;
+}
+
+
+-(void)	keyDown:(NSEvent *)theEvent
+{
+	[self interpretKeyEvents: [NSArray arrayWithObjects: theEvent, nil]];
+}
+
+
+-(void)	moveUp:(id)sender
+{
+	NSInteger		newSelectedRow = [_selectedRows firstIndex];
+	if( [_selectedRows count] == 0 )
+		newSelectedRow = _numberOfRows -1;	// NSTableView defaults to selecting last row for up-arrow w/o selection.
+	else
+	{
+		if( newSelectedRow > 0 )
+			newSelectedRow -= 1;
+	}
+	
+	[self setSelectedRow: newSelectedRow];
+	[self scrollRowToVisible: newSelectedRow];
+}
+
+
+-(void)	moveDown:(id)sender
+{
+	NSInteger		newSelectedRow = [_selectedRows lastIndex];
+	if( [_selectedRows count] == 0 )
+		newSelectedRow = 0;	// NSTableView defaults to selecting first row for down-arrow w/o selection.
+	else
+	{
+		if( newSelectedRow < (_numberOfRows -1) )
+			newSelectedRow += 1;
+	}
+	
+	[self setSelectedRow: newSelectedRow];
+	[self scrollRowToVisible: newSelectedRow];
+}
+
+
+
 #pragma mark -
 #pragma mark Layout
 
@@ -495,6 +564,22 @@
 {
 	[self updateCells];
 }
+
+
+- (void)	scrollRowToVisible: (NSInteger)row
+{
+	if( row < 0 || row >= _numberOfRows )
+		return;
+	
+	NSRect		rowRect = [self rectOfRow: row];
+	NSPoint		newScrollPoint = [[self contentView] constrainScrollPoint: rowRect.origin];
+	
+	// +++ Use minimal scroll necessary. Right now it forces the selection to upper left of window.
+	
+	[[self contentView] scrollToPoint: newScrollPoint];
+	[self reflectScrolledClipView: [self contentView]];
+}
+
 
 #pragma mark -
 #pragma mark Sizing
