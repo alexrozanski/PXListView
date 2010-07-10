@@ -19,6 +19,8 @@
 - (PXListViewCell*)	visibleCellForRow: (NSInteger)row;
 - (NSArray*)		visibleCellsForRowIndexes: (NSIndexSet*)rows;
 
+- (void)			deselectRowIndexes: (NSIndexSet*)rows;
+
 - (void)			updateCells;
 
 - (void)			enqueueCell: (PXListViewCell*)cell;

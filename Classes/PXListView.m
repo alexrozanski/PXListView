@@ -137,7 +137,7 @@
 - (void)selectRowIndexes: (NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend
 {
 	if( !doExtend )
-		[self deselectRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
+		[self deselectRowIndexes: _selectedRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
 	
 	[_selectedRows addIndexes: rows];	// _selectedRows is empty if !doExtend, because we just deselected all.
 

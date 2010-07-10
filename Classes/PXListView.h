@@ -48,9 +48,7 @@
 - (NSRange)			visibleRange;
 - (NSRect)			rectOfRow: (NSInteger)row;
 - (void)			deselectRows;
-
 - (void)			selectRowIndexes:(NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend;
-- (void)			deselectRowIndexes: (NSIndexSet*)rows;
 
 - (void)			scrollRowToVisible: (NSInteger)row;
 
