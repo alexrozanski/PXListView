@@ -39,10 +39,6 @@
 	}
 	
 	[listView reloadData];
-	
-//	NSImage*	dragImg = [listView dragImageForRowsWithIndexes: [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0,NUM_EXAMPLE_ITEMS-1)]
-//										event: nil offset: nil];
-//	[[dragImg TIFFRepresentation] writeToFile: [@"~/dragimage.tiff" stringByExpandingTildeInPath] atomically: YES];
 }
 
 - (void)dealloc
