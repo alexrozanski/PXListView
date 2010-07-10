@@ -10,23 +10,31 @@
 
 #import "MyListViewCell.h"
 
+
+#pragma mark Constants
+
 #define LISTVIEW_CELL_IDENTIFIER		@"MyListViewCell"
+#define NUM_EXAMPLE_ITEMS				1000
+
 
 @implementation AppDelegate
 
 #pragma mark -
 #pragma mark Init/Dealloc
 
-- (void)awakeFromNib
+-(void)	awakeFromNib
 {
-	[listView setCellSpacing:2];
+	[listView setCellSpacing: 2];
+	//[listView setAllowsEmptySelection: YES];
+	//[listView setAllowsMultipleSelection: YES];
 	
 	_listItems = [[NSMutableArray alloc] init];
 
-	//Create 1000 rows as a test
-	for(NSInteger i=0;i<1000;i++) {
-		NSString *title = [[NSString alloc] initWithFormat:@"Item%d", i+1]; //We're in a tight loop
-		[_listItems addObject:title];
+	// Create a bunch of rows as a test:
+	for( NSInteger i = 0; i < NUM_EXAMPLE_ITEMS; i++ )
+	{
+		NSString *title = [[NSString alloc] initWithFormat: @"Item %d", i +1]; // We're in a tight loop
+		[_listItems addObject: title];
 		[title release];
 	}
 	
