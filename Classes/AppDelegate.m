@@ -61,7 +61,7 @@
 	return cell;
 }
 
-- (NSInteger)listView:(PXListView*)aListView heightOfRow:(NSInteger)row
+- (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSInteger)row
 {
 	return 50;
 }
