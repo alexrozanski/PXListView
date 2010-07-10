@@ -609,7 +609,7 @@
 		}
 	}
 	
-	// Now draw all cells into
+	// Now draw all cells into the image at the proper relative position:
 	NSSize		imageSize = NSMakeSize( maxX -minX, maxY -minY);
 	NSImage*	dragImage = [[[NSImage alloc] initWithSize: imageSize] autorelease];
 	
@@ -627,6 +627,7 @@
 		
 	[dragImage unlockFocus];
 	
+	// Give caller the right offset so the image ends up right atop the actual views:
 	if( dragImageOffset )	// +++ Untested, offset may have wrong sign for passing to AppKit's drag routines, in which case, please fix.
 	{
 		dragImageOffset->x = localMouse.x -minX;
