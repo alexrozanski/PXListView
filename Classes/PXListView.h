@@ -52,4 +52,5 @@
 
 - (void)			scrollRowToVisible: (NSInteger)row;
 
+- (NSImage*)		dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent offset: (NSPointPointer)dragImageOffset;
 @end

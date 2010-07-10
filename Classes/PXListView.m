@@ -582,6 +582,62 @@
 
 
 #pragma mark -
+#pragma mark Drag and Drop
+
+-(NSImage*)	dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent offset: (NSPointPointer)dragImageOffset
+{
+	CGFloat		minX = CGFLOAT_MAX, maxX = CGFLOAT_MIN,
+				minY = CGFLOAT_MAX, maxY = CGFLOAT_MIN;
+	NSPoint		localMouse = dragEvent ? [self convertPoint: [dragEvent locationInWindow] fromView: nil] : NSZeroPoint;
+	
+	// Determine how large an image we'll need to hold all cells, with their
+	//	*unclipped* rectangles:
+	for( PXListViewCell* currCell in _visibleCells )
+	{
+		NSInteger		currRow = [currCell row];
+		if( [dragRows containsIndex: currRow] )
+		{
+			NSRect		rowRect = [self rectOfRow: currRow];
+			if( rowRect.origin.x < minX )
+				minX = rowRect.origin.x;
+			if( rowRect.origin.y < minY )
+				minY = rowRect.origin.y;
+			if( NSMaxX(rowRect) > maxX )
+				maxX = NSMaxX(rowRect);
+			if( NSMaxY(rowRect) > maxY )
+				maxY = NSMaxY(rowRect);
+		}
+	}
+	
+	// Now draw all cells into
+	NSSize		imageSize = NSMakeSize( maxX -minX, maxY -minY);
+	NSImage*	dragImage = [[[NSImage alloc] initWithSize: imageSize] autorelease];
+	
+	[dragImage lockFocus];
+		
+		for( PXListViewCell* currCell in _visibleCells )
+		{
+			NSRect				rowRect = [self rectOfRow: [currCell row]];
+			NSBitmapImageRep*	bir = [currCell bitmapImageRepForCachingDisplayInRect: [currCell bounds]];
+			[currCell cacheDisplayInRect: [currCell bounds] toBitmapImageRep: bir];
+			NSPoint				thePos = NSMakePoint( rowRect.origin.x -minX, rowRect.origin.y -minY);
+			thePos.y = imageSize.height -(thePos.y +rowRect.size.height);	// Document view is flipped, so flip the coordinates before drawing into image, or the list items will be reversed.
+			[bir drawAtPoint: thePos];
+		}
+		
+	[dragImage unlockFocus];
+	
+	if( dragImageOffset )	// +++ Untested, offset may have wrong sign for passing to AppKit's drag routines, in which case, please fix.
+	{
+		dragImageOffset->x = localMouse.x -minX;
+		dragImageOffset->y = localMouse.y -minY;
+	}
+	
+	return dragImage;
+}
+
+
+#pragma mark -
 #pragma mark Sizing
 
 - (void)viewWillStartLiveResize
