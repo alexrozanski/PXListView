@@ -9,6 +9,7 @@
 #import "PXListDocumentView.h"
 
 #import "PXListView.h"
+#import "PXListView+Private.h"
 
 @implementation PXListDocumentView
 
@@ -21,7 +22,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-	[[self listView] deselectRows];
+	[[self listView] handleMouseDownOutsideCells: theEvent];
 }
 
 @end

@@ -382,6 +382,16 @@
 	}
 }
 
+
+- (void)	handleMouseDownOutsideCells: (NSEvent*)theEvent
+{
+	if( _allowsEmptySelection )
+		[self deselectRows];
+	else if( _numberOfRows > 1 )
+		[self setSelectedRow: _numberOfRows -1];
+	// else if ( !_allowsEmptySelection and _numberOfRows <=1 )
+	//	Nothing to do. Can't unselect last or no item.
+}
 #pragma mark -
 #pragma mark Layout
 

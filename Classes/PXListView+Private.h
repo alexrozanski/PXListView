@@ -24,5 +24,6 @@
 - (void)			enqueueCell: (PXListViewCell*)cell;
 
 - (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
+- (void)			handleMouseDownOutsideCells: (NSEvent*)theEvent;
 
 @end
