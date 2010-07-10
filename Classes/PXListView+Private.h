@@ -7,17 +7,22 @@
 //
 
 @interface PXListView ()
-- (NSRect)contentViewRect;
 
-- (void)cacheCellLayout;
-- (void)layoutCells;
-- (void)layoutCell:(PXListViewCell*)cell;
+- (NSRect)			contentViewRect;
 
-- (void)addCellsFromVisibleRange;
-- (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row;
-- (PXListViewCell*)visibleCellForRow:(NSInteger)row;
+- (void)			cacheCellLayout;
+- (void)			layoutCells;
+- (void)			layoutCell: (PXListViewCell*)cell;
 
-- (void)updateCells;
+- (void)			addCellsFromVisibleRange;
+- (void)			addNewVisibleCell: (PXListViewCell*)cell atRow: (NSInteger)row;
+- (PXListViewCell*)	visibleCellForRow: (NSInteger)row;
+- (NSArray*)		visibleCellsForRowIndexes: (NSIndexSet*)rows;
 
-- (void)enqueueCell:(PXListViewCell*)cell;
+- (void)			updateCells;
+
+- (void)			enqueueCell: (PXListViewCell*)cell;
+
+- (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
+
 @end

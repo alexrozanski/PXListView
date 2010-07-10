@@ -6,8 +6,11 @@
 //  Copyright 2010 Alex Rozanski. http://perspx.com. All rights reserved.
 //
 
+
 #import "PXListView.h"
 #import "PXListView+Private.h"
+
+#import <iso646.h>
 
 #import "PXListViewCell.h"
 #import "PXListViewCell+Private.h"
@@ -17,16 +20,32 @@
 
 @synthesize delegate = _delegate;
 @synthesize cellSpacing = _cellSpacing;
-@synthesize selectedRow = _selectedRow;
+@synthesize allowsMultipleSelection = _allowsMultipleSelection;
+@synthesize allowsEmptySelection = _allowsEmptySelection;
 
 #pragma mark -
 #pragma mark Init/Dealloc
 
-- (id)initWithCoder:(NSCoder*)decoder
+-(id)	initWithFrame: (NSRect)theFrame
 {
-	if(self = [super initWithCoder:decoder]) {
+	if(( self = [super initWithFrame: theFrame] ))
+	{
 		_reusableCells = [[NSMutableArray alloc] init];
 		_visibleCells = [[NSMutableArray alloc] init];
+		_selectedRows = [[NSMutableIndexSet alloc] init];
+	}
+	
+	return self;
+}
+
+-(id)	initWithCoder: (NSCoder*)decoder
+{
+	if(( self = [super initWithCoder:decoder] ))
+	{
+		_reusableCells = [[NSMutableArray alloc] init];
+		_visibleCells = [[NSMutableArray alloc] init];
+		_selectedRows = [[NSMutableIndexSet alloc] init];
+		_allowsMultipleSelection = YES;
 	}
 	
 	return self;
@@ -47,12 +66,17 @@
 	[[self documentView] setListView:self];
 }
 
-- (void)dealloc
+-(void)	dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
 	[_reusableCells release];
+	_reusableCells = nil;
 	[_visibleCells release];
+	_visibleCells = nil;
+	[_selectedRows release];
+	_selectedRows = nil;
+	
 	[super dealloc];
 }
 
@@ -68,7 +92,7 @@
 	[_visibleCells removeAllObjects];
 	free(_cellYOffsets);
 	
-	_selectedRow = -1;
+	[_selectedRows removeAllIndexes];
 	
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
@@ -83,28 +107,64 @@
 	}
 }
 
-- (void)setSelectedRow:(NSInteger)row
+
+- (void)setSelectedRow: (NSInteger)row
 {
-	NSInteger oldSelectedRow = _selectedRow;
-	
-	if(oldSelectedRow>=_currentRange.location&&oldSelectedRow<=NSMaxRange(_currentRange)) {
-		PXListViewCell *oldSelectedCell = [self visibleCellForRow:oldSelectedRow];
-		[oldSelectedCell setNeedsDisplay:YES];
-	}
-	
-	PXListViewCell *newSelectedCell = [self visibleCellForRow:row];
-	[newSelectedCell setNeedsDisplay:YES];
-	
-	_selectedRow = row;
+	[self selectRowIndexes: [NSIndexSet indexSetWithIndex: row] byExtendingSelection: NO];
 }
 
-- (void)deselectRows
+
+-(NSInteger)	selectedRow
 {
-	NSInteger oldSelectedRow = _selectedRow ;
-	_selectedRow = -1;
+	if( [_selectedRows count] == 1 )
+		return [_selectedRows firstIndex];
+	else
+		return -1;	// This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
+}
+
+
+-(void)	setSelectedRows: (NSIndexSet *)rows
+{
+	[self selectRowIndexes: rows byExtendingSelection: NO];
+}
+
+
+-(NSIndexSet*)	selectedRows
+{
+	return _selectedRows;	// +++ Copy/autorelease?
+}
+
+
+- (void)selectRowIndexes: (NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend
+{
+	if( !doExtend )
+		[self deselectRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
 	
-	PXListViewCell *oldSelectedCell = [self visibleCellForRow:oldSelectedRow];
-	[oldSelectedCell setNeedsDisplay:YES];
+	[_selectedRows addIndexes: rows];	// _selectedRows is empty if !doExtend, because we just deselected all.
+
+	NSArray*	newSelectedCells = [self visibleCellsForRowIndexes: rows];
+	for( PXListViewCell *newSelectedCell in newSelectedCells )
+	{
+		[newSelectedCell setNeedsDisplay: YES];
+	}
+}
+
+
+-(void)	deselectRowIndexes: (NSIndexSet*)rows
+{
+	NSArray*	oldSelectedCells = [self visibleCellsForRowIndexes: rows];
+	[_selectedRows removeIndexes: rows];
+	
+	for( PXListViewCell *oldSelectedCell in oldSelectedCells )
+	{
+		[oldSelectedCell setNeedsDisplay: YES];
+	}
+}
+
+
+-(void)	deselectRows
+{
+	[self deselectRowIndexes: _selectedRows];
 }
 
 #pragma mark -
@@ -182,6 +242,21 @@
 	}
 	
 	return theCell;
+}
+
+-(NSArray*)	visibleCellsForRowIndexes: (NSIndexSet*)rows
+{
+	NSMutableArray		*theCells = [NSMutableArray array];
+	
+	for( id cell in _visibleCells )
+	{
+		if( [rows containsIndex: [cell row]] )
+		{
+			[theCells addObject: cell];
+		}
+	}
+	
+	return theCells;
 }
 
 - (void)addCellsFromVisibleRange
@@ -266,6 +341,41 @@
 	[cell setListView:self];
 	[cell setRow:row];
 	[self layoutCell:cell];
+}
+
+
+- (void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
+{
+	BOOL		shouldToggle = ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
+	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
+	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
+	
+	if( _allowsMultipleSelection )
+	{
+		if( isSelected && shouldToggle )
+		{
+			if( [_selectedRows count] == 1 && !_allowsEmptySelection )
+				return;
+			[self deselectRowIndexes: clickedIndexSet];
+		}
+		else if( !isSelected && shouldToggle )
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
+		else if( !isSelected && !shouldToggle )
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+		// else
+		//	do nothing if it's already selected and we're not toggling.
+	}
+	else if( shouldToggle && _allowsEmptySelection )
+	{
+		if( isSelected )
+			[self deselectRowIndexes: clickedIndexSet];
+		else
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+	}
+	else
+	{
+		[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+	}
 }
 
 #pragma mark -

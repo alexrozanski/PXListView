@@ -11,35 +11,45 @@
 #import "PXListViewDelegate.h"
 #import "PXListViewCell.h"
 
-@interface PXListView : NSScrollView {
+
+@interface PXListView : NSScrollView
+{
 	id <PXListViewDelegate> _delegate;
 	
-	NSMutableArray *_reusableCells;
-	NSMutableArray *_visibleCells;
-	NSRange _currentRange;
+	NSMutableArray		*_reusableCells;
+	NSMutableArray		*_visibleCells;
+	NSRange				_currentRange;
 	
-	NSInteger _numberOfRows;
-	NSInteger _selectedRow;
+	NSInteger			_numberOfRows;
+	NSMutableIndexSet	*_selectedRows;
 	
-	NSRange _visibleRange;
-	CGFloat _totalHeight;
-	CGFloat *_cellYOffsets;
+	NSRange				_visibleRange;
+	CGFloat				_totalHeight;
+	CGFloat				*_cellYOffsets;
 	
-	CGFloat _cellSpacing;
+	CGFloat				_cellSpacing;
 	
-	BOOL _inLiveResize;
+	BOOL				_inLiveResize;
+	BOOL				_allowsEmptySelection;
+	BOOL				_allowsMultipleSelection;
 }
 
-@property (readwrite, assign) IBOutlet id <PXListViewDelegate> delegate;
-@property CGFloat cellSpacing;
-@property NSInteger selectedRow;
+@property (readwrite, assign) IBOutlet id <PXListViewDelegate>	delegate;
+@property (readwrite, assign) CGFloat							cellSpacing;
+@property (readwrite, retain) NSIndexSet*						selectedRows;
+@property (readwrite, assign) NSInteger							selectedRow;	// shorthand for selectedRows.
+@property (readwrite, assign) BOOL								allowsEmptySelection;
+@property (readwrite, assign) BOOL								allowsMultipleSelection;
 
-- (void)reloadData;
+- (void)			reloadData;
 
-- (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
+- (PXListViewCell*)	dequeueCellWithReusableIdentifier: (NSString*)identifier;
 
-- (NSRange)visibleRange;
-- (NSRect)rectOfRow:(NSInteger)row;
-- (void)deselectRows;
+- (NSRange)			visibleRange;
+- (NSRect)			rectOfRow: (NSInteger)row;
+- (void)			deselectRows;
+
+- (void)			selectRowIndexes:(NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend;
+- (void)			deselectRowIndexes: (NSIndexSet*)rows;
 
 @end

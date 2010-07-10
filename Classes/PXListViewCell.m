@@ -10,6 +10,7 @@
 #import "PXListViewCell+Private.h"
 
 #import "PXListView.h"
+#import "PXListView+Private.h"
 
 #pragma mark -
 
@@ -43,12 +44,12 @@
 - (void)mouseDown:(NSEvent *)theEvent
 {
 	PXListView *listView = [self listView];
-	[listView setSelectedRow:[self row]];
+	[listView handleMouseDown: theEvent inCell: self];
 }
 
 - (BOOL)isSelected
 {
-	return [self row]==[[self listView] selectedRow];
+	return [[[self listView] selectedRows] containsIndex: [self row]];
 }
 
 #pragma mark -
