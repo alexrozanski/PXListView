@@ -10,8 +10,9 @@
 
 #import "PXListViewCell.h"
 
-@interface MyListViewCell : PXListViewCell {
-	NSString *title;
+@interface MyListViewCell : PXListViewCell
+{
+	NSString		*_title;
 }
 
 @property (copy) NSString *title;

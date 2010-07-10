@@ -10,11 +10,12 @@
 
 #import "PXListView.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, PXListViewDelegate> {
-    IBOutlet NSWindow *window;
-	IBOutlet PXListView *listView;
+@interface AppDelegate : NSObject <NSApplicationDelegate, PXListViewDelegate>
+{
+    IBOutlet NSWindow	*window;
+	IBOutlet PXListView	*listView;
 	
-	NSMutableArray *_listItems;
+	NSMutableArray		*_listItems;
 }
 
 @end

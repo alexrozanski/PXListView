@@ -25,13 +25,13 @@ typedef NSUInteger PXListViewDropHighlight;
 	NSString				*_reusableIdentifier;
 	
 	PXListView				*_listView;
-	NSInteger				_row;
+	NSUInteger				_row;
 	PXListViewDropHighlight	_dropHighlight;
 }
 
 @property (assign) PXListView				*listView;
 @property (readonly) NSString				*reusableIdentifier;
-@property (readonly) NSInteger				row;
+@property (readonly) NSUInteger				row;
 @property (readonly,getter=isSelected) BOOL	selected;
 @property (assign) PXListViewDropHighlight	dropHighlight;
 

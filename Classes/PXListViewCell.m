@@ -69,21 +69,22 @@
 
 -(void)	drawRect:(NSRect)dirtyRect
 {
+#pragma unused(dirtyRect)
 	if( _dropHighlight == PXListViewDropAbove )
 	{
 		[[NSColor selectedControlColor] set];
 		NSRect		theBox = [self bounds];
-		theBox.origin.y += theBox.size.height -1;
-		theBox.size.height = 2;
-		[NSBezierPath setDefaultLineWidth: 2];
+		theBox.origin.y += theBox.size.height -1.0f;
+		theBox.size.height = 2.0f;
+		[NSBezierPath setDefaultLineWidth: 2.0f];
 		[NSBezierPath strokeRect: theBox];
 	}
 	else if( _dropHighlight == PXListViewDropOn )
 	{
 		[[NSColor selectedControlColor] set];
 		NSRect		theBox = [self bounds];
-		[NSBezierPath setDefaultLineWidth: 2];
-		[NSBezierPath strokeRect: NSInsetRect(theBox,1,1)];
+		[NSBezierPath setDefaultLineWidth: 2.0f];
+		[NSBezierPath strokeRect: NSInsetRect(theBox,1.0f,1.0f)];
 	}
 }
 
@@ -109,7 +110,7 @@
 	return attribs;
 }
 
-- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute;
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute
 {
 	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
 		or [attribute isEqualToString: NSAccessibilityEnabledAttribute] )

@@ -13,9 +13,9 @@
 @protocol PXListViewDelegate <NSObject>
 
 @required
-- (NSInteger)		numberOfRowsInListView: (PXListView*)aListView;
-- (PXListViewCell*)	listView: (PXListView*)aListView cellForRow: (NSInteger)row;
-- (CGFloat)			listView: (PXListView*)aListView heightOfRow: (NSInteger)row;
+- (NSUInteger)		numberOfRowsInListView: (PXListView*)aListView;
+- (PXListViewCell*)	listView: (PXListView*)aListView cellForRow: (NSUInteger)row;
+- (CGFloat)			listView: (PXListView*)aListView heightOfRow: (NSUInteger)row;
 
 @optional
 - (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;

@@ -13,31 +13,34 @@
 
 @implementation MyListViewCell
 
-@synthesize title;
+@synthesize title = _title;
 
 #pragma mark -
 #pragma mark Init/Dealloc
 
-- (id)initWithReusableIdentifier:(NSString*)identifier
+- (id)	initWithReusableIdentifier: (NSString*)identifier
 {
-	if(self = [super initWithReusableIdentifier:identifier]) {
+	if(( self = [super initWithReusableIdentifier: identifier] ))
+	{
+		
 	}
 	
 	return self;
 }
 
-- (void)dealloc
+- (void)	dealloc
 {
-	[title release];
+	[_title release];
 	[super dealloc];
 }
 
 #pragma mark -
 #pragma mark Reuse
 
-- (void)prepareForReuse
+- (void)	prepareForReuse
 {
-	[title release], title=nil;
+	[_title release];
+	_title = nil;
 }
 
 #pragma mark -
@@ -61,8 +64,8 @@
 	NSFrameRect(bounds);
 	
 	//Draw the title
-	NSSize titleSize = [title sizeWithAttributes:attributes];
-	[title drawAtPoint:NSMakePoint(5, NSMaxY(bounds)-titleSize.height-5) withAttributes:attributes];
+	NSSize titleSize = [_title sizeWithAttributes:attributes];
+	[_title drawAtPoint:NSMakePoint(5.0f, NSMaxY(bounds)-titleSize.height-5) withAttributes:attributes];
 	[attributes release];
 	
 	[super drawRect: dirtyRect];
@@ -84,7 +87,7 @@
 	return attribs;
 }
 
-- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute;
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute
 {
 	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
 		or [attribute isEqualToString: NSAccessibilityDescriptionAttribute]
@@ -106,7 +109,7 @@
 	else if( [attribute isEqualToString: NSAccessibilityDescriptionAttribute]
 			or [attribute isEqualToString: NSAccessibilityTitleAttribute] )
 	{
-		return title;
+		return _title;
 	}
 	else if( [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
 	{

@@ -9,7 +9,8 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface PXListClipView : NSClipView {
+@interface PXListClipView : NSClipView
+{
 
 }
 

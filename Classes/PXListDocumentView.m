@@ -27,12 +27,13 @@
 }
 
 
--(void)	drawRect:(NSRect)dirtyRect
+-(void)	drawRect: (NSRect)dirtyRect
 {
+#pragma unused(dirtyRect)
 	if( _showsDropHighlight )
 	{
-		CGFloat		lineWidth = 2;
-		CGFloat		lineWidthHalf = lineWidth / 2.0;
+		CGFloat		lineWidth = 2.0f;
+		CGFloat		lineWidthHalf = lineWidth / 2.0f;
 		
 		[[NSColor selectedControlColor] set];
 		[NSBezierPath setDefaultLineWidth: lineWidth];
