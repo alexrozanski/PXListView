@@ -13,8 +13,11 @@
 @protocol PXListViewDelegate <NSObject>
 
 @required
-- (NSInteger)numberOfRowsInListView:(PXListView*)aListView;
-- (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSInteger)row;
-- (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSInteger)row;
+- (NSInteger)		numberOfRowsInListView: (PXListView*)aListView;
+- (PXListViewCell*)	listView: (PXListView*)aListView cellForRow: (NSInteger)row;
+- (CGFloat)			listView: (PXListView*)aListView heightOfRow: (NSInteger)row;
+
+@optional
+- (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;
 
 @end

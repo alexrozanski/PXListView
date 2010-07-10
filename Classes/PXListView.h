@@ -32,6 +32,7 @@
 	BOOL				_inLiveResize;
 	BOOL				_allowsEmptySelection;
 	BOOL				_allowsMultipleSelection;
+	BOOL				_verticalMotionCanBeginDrag;
 }
 
 @property (readwrite, assign) IBOutlet id <PXListViewDelegate>	delegate;
@@ -40,6 +41,7 @@
 @property (readwrite, assign) NSInteger							selectedRow;	// shorthand for selectedRows.
 @property (readwrite, assign) BOOL								allowsEmptySelection;
 @property (readwrite, assign) BOOL								allowsMultipleSelection;
+@property (readwrite, assign) BOOL								verticalMotionCanBeginDrag;
 
 - (void)			reloadData;
 
@@ -52,5 +54,6 @@
 
 - (void)			scrollRowToVisible: (NSInteger)row;
 
-- (NSImage*)		dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent offset: (NSPointPointer)dragImageOffset;
+-(NSImage*)	dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell offset: (NSPointPointer)dragImageOffset;
+
 @end

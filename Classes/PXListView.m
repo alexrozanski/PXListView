@@ -6,6 +6,7 @@
 //  Copyright 2010 Alex Rozanski. http://perspx.com. All rights reserved.
 //
 
+#pragma mark Headers
 
 #import "PXListView.h"
 #import "PXListView+Private.h"
@@ -16,12 +17,86 @@
 #import "PXListViewCell+Private.h"
 
 
+#pragma mark Helpers
+
+// This is a renamed copy of UKIsDragStart from <http://github.com/uliwitness/UliKit>:
+
+// Possible return values from UKIsDragStart:
+enum
+{
+	PXIsDragStartMouseReleased = 0,
+	PXIsDragStartTimedOut,
+	PXIsDragStartMouseMovedHorizontally,
+	PXIsDragStartMouseMovedVertically
+};
+typedef NSInteger PXIsDragStartResult;
+
+static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval theTimeout )
+{
+	if( theTimeout == 0.0 )
+		theTimeout = 1.5;
+	
+	NSPoint			startPos = [startEvent locationInWindow];
+	NSTimeInterval	startTime = [NSDate timeIntervalSinceReferenceDate];
+	NSDate*			expireTime = [NSDate dateWithTimeIntervalSinceReferenceDate: startTime +theTimeout];
+	
+	NSAutoreleasePool	*pool = nil;
+	while( ([expireTime timeIntervalSinceReferenceDate] -[NSDate timeIntervalSinceReferenceDate]) > 0 )
+	{
+		[pool release];
+		pool = [[NSAutoreleasePool alloc] init];
+		
+		NSEvent*	currEvent = [NSApp nextEventMatchingMask: NSLeftMouseUpMask | NSRightMouseUpMask | NSOtherMouseUpMask
+															| NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask
+									untilDate: expireTime inMode: NSEventTrackingRunLoopMode dequeue: YES];
+		if( currEvent )
+		{
+			switch( [currEvent type] )
+			{
+				case NSLeftMouseUp:
+				case NSRightMouseUp:
+				case NSOtherMouseUp:
+				{
+					[pool release];
+					return PXIsDragStartMouseReleased;	// Mouse released within the wait time.
+					break;
+				}
+				
+				case NSLeftMouseDragged:
+				case NSRightMouseDragged:
+				case NSOtherMouseDragged:
+				{
+					NSPoint	newPos = [currEvent locationInWindow];
+					CGFloat	xMouseMovement = fabs(newPos.x -startPos.x),
+							yMouseMovement = abs(newPos.y -startPos.y);
+					if( xMouseMovement > 2 or yMouseMovement > 2 )
+					{
+						[pool release];
+						return (xMouseMovement > yMouseMovement) ? PXIsDragStartMouseMovedHorizontally : PXIsDragStartMouseMovedVertically;	// Mouse moved within the wait time, probably a drag!
+					}
+					break;
+				}
+			}
+		}
+		
+	}
+	
+	[pool release];
+	return PXIsDragStartTimedOut;	// If they held the mouse that long, they probably wanna drag.
+}
+
+
+
+#pragma mark -
+
+
 @implementation PXListView
 
 @synthesize delegate = _delegate;
 @synthesize cellSpacing = _cellSpacing;
 @synthesize allowsMultipleSelection = _allowsMultipleSelection;
 @synthesize allowsEmptySelection = _allowsEmptySelection;
+@synthesize verticalMotionCanBeginDrag = _verticalMotionCanBeginDrag;
 
 #pragma mark -
 #pragma mark Init/Dealloc
@@ -348,6 +423,27 @@
 }
 
 
+- (BOOL)	attemptDragWithMouseDown: (NSEvent*)theEvent inCell: (PXListViewCell*)theCell
+{
+	PXIsDragStartResult	dragResult = PXIsDragStart( theEvent, 0.0 );
+	if( dragResult != PXIsDragStartMouseReleased /*&& (_verticalMotionCanBeginDrag || dragResult != PXIsDragStartMouseMovedVertically)*/ )	// Was a drag, not a click? Cool!
+	{
+		NSPoint			dragImageOffset = NSZeroPoint;
+		NSImage			*dragImage = [self dragImageForRowsWithIndexes: _selectedRows event: theEvent clickedCell: theCell offset: &dragImageOffset];
+		NSPasteboard	*dragPasteboard = [NSPasteboard pasteboardWithUniqueName];
+		
+		if( [_delegate respondsToSelector: @selector(listView:writeRowsWithIndexes:toPasteboard:)]
+			and [_delegate listView: self writeRowsWithIndexes: _selectedRows toPasteboard: dragPasteboard] )
+		{
+			[theCell dragImage: dragImage at: dragImageOffset offset: NSZeroSize event: theEvent pasteboard: dragPasteboard source: self slideBack: YES];
+			
+			return YES;
+		}
+	}
+	
+	return NO;
+}
+
 - (void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
 	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
@@ -355,6 +451,10 @@
 	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
 	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
 	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
+	
+	// If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
+	if( theEvent and isSelected and [self attemptDragWithMouseDown: theEvent inCell: theCell] )
+		return;
 	
 	if( _allowsMultipleSelection )
 	{
@@ -382,6 +482,10 @@
 	{
 		[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
 	}
+	
+	// If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
+	if( theEvent and [_selectedRows containsIndex: [theCell row]] and [self attemptDragWithMouseDown: theEvent inCell: theCell] )
+		return;
 }
 
 
@@ -584,11 +688,11 @@
 #pragma mark -
 #pragma mark Drag and Drop
 
--(NSImage*)	dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent offset: (NSPointPointer)dragImageOffset
+-(NSImage*)	dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell offset: (NSPointPointer)dragImageOffset
 {
 	CGFloat		minX = CGFLOAT_MAX, maxX = CGFLOAT_MIN,
 				minY = CGFLOAT_MAX, maxY = CGFLOAT_MIN;
-	NSPoint		localMouse = dragEvent ? [self convertPoint: [dragEvent locationInWindow] fromView: nil] : NSZeroPoint;
+	NSPoint		localMouse = [self convertPoint: NSZeroPoint fromView: clickedCell];
 	
 	// Determine how large an image we'll need to hold all cells, with their
 	//	*unclipped* rectangles:
@@ -609,7 +713,7 @@
 		}
 	}
 	
-	// Now draw all cells into the image at the proper relative position:
+	// Now draw all cells into the image at the proper relative position:Just Testing
 	NSSize		imageSize = NSMakeSize( maxX -minX, maxY -minY);
 	NSImage*	dragImage = [[[NSImage alloc] initWithSize: imageSize] autorelease];
 	
@@ -628,10 +732,10 @@
 	[dragImage unlockFocus];
 	
 	// Give caller the right offset so the image ends up right atop the actual views:
-	if( dragImageOffset )	// +++ Untested, offset may have wrong sign for passing to AppKit's drag routines, in which case, please fix.
+	if( dragImageOffset )
 	{
-		dragImageOffset->x = localMouse.x -minX;
-		dragImageOffset->y = localMouse.y -minY;
+		dragImageOffset->x = -(localMouse.x -minX);
+		dragImageOffset->y = (localMouse.y -minY) -imageSize.height;
 	}
 	
 	return dragImage;

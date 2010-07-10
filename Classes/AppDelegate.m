@@ -67,7 +67,7 @@
 		cell = [[[MyListViewCell alloc] initWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER] autorelease];
 	}
 	
-	//Set up the new cell
+	// Set up the new cell:
 	[cell setTitle:[_listItems objectAtIndex:row]];
 	
 	return cell;
@@ -76,6 +76,17 @@
 - (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSInteger)row
 {
 	return 50;
+}
+
+
+// The following are only needed for drag'n drop:
+- (BOOL)	listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)dragPasteboard
+{
+	// +++ Actually drag the items, not just dummy data.
+	[dragPasteboard declareTypes: [NSArray arrayWithObjects: NSStringPboardType, nil] owner: self];
+	[dragPasteboard setString: @"Just Testing" forType: NSStringPboardType];
+	
+	return YES;
 }
 
 @end
