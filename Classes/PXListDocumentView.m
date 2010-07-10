@@ -14,7 +14,7 @@
 @implementation PXListDocumentView
 
 @synthesize listView = _listView;
-@synthesize showsDropHighlight = _showsDropHighlight;
+@synthesize dropHighlight = _dropHighlight;
 
 - (BOOL)isFlipped
 {
@@ -30,7 +30,9 @@
 -(void)	drawRect: (NSRect)dirtyRect
 {
 #pragma unused(dirtyRect)
-	if( _showsDropHighlight )
+	
+	// We always show the outline:
+	if( _dropHighlight != PXListViewDropNowhere )
 	{
 		CGFloat		lineWidth = 2.0f;
 		CGFloat		lineWidthHalf = lineWidth / 2.0f;
@@ -39,11 +41,24 @@
 		[NSBezierPath setDefaultLineWidth: lineWidth];
 		[NSBezierPath strokeRect: NSInsetRect([self visibleRect], lineWidthHalf, lineWidthHalf)];
 	}
+	
+	if( _dropHighlight == PXListViewDropAbove )	// DropAbove means after last cell.
+	{
+		CGFloat		lineWidth = 2.0f;
+		CGFloat		lineWidthHalf = lineWidth / 2.0f;
+		NSRect		theBox = [self bounds];
+		
+		// +++ Calc rect for line below last item.
+		
+		[[NSColor selectedControlColor] set];
+		[NSBezierPath setDefaultLineWidth: lineWidth];
+		[NSBezierPath strokeRect: NSInsetRect(theBox, lineWidthHalf, lineWidthHalf)];
+	}
 }
 
--(void)	setShowsDropHighlight:(BOOL)inState
+-(void)	setDropHighlight: (PXListViewDropHighlight)inState
 {
-	_showsDropHighlight = inState;
+	_dropHighlight = inState;
 	[self setNeedsDisplayInRect: [self visibleRect]];
 }
 
