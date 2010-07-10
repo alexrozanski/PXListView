@@ -36,7 +36,6 @@ Attributions
 
 Thanks to [Mike Abdullah][4] for optimizations related to cell dequeuing.
 
-This version of PXListView has been modified by [Uli Kusterer][5]. Don't blame the original author for any issues you may have with this code.
 Thanks to [Uli Kusterer][5] for additions and fixes to PXListView including momentum scrolling, keyboard navigation, changes to variable row heights (using CGFloats) and accessibility.
 
   [1]: http://perspx.com/blog/archives/1427/making-list-views-really-fast/
