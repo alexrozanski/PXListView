@@ -64,6 +64,8 @@
 	NSSize titleSize = [title sizeWithAttributes:attributes];
 	[title drawAtPoint:NSMakePoint(5, NSMaxY(bounds)-titleSize.height-5) withAttributes:attributes];
 	[attributes release];
+	
+	[super drawRect: dirtyRect];
 }
 
 

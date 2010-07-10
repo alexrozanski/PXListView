@@ -21,13 +21,15 @@
 @synthesize reusableIdentifier = _reusableIdentifier;
 @synthesize listView = _listView;
 @synthesize row = _row;
+@synthesize dropHighlight = _dropHighlight;
 
 #pragma mark -
 #pragma mark Init/Dealloc
 
 - (id)initWithReusableIdentifier:(NSString*)identifier
 {
-	if(self = [super initWithFrame:NSZeroRect]) {
+	if(( self = [super initWithFrame: NSZeroRect] ))
+	{
 		_reusableIdentifier = [identifier copy];
 	}
 	
@@ -54,10 +56,44 @@
 }
 
 #pragma mark -
+#pragma mark Drag & Drop
+
+- (void)	setDropHighlight: (PXListViewDropHighlight)inState
+{
+	[[self listView] setShowsDropHighlight: inState != PXListViewDropNowhere];
+	
+	_dropHighlight = inState;
+	[self setNeedsDisplay: YES];
+}
+
+
+-(void)	drawRect:(NSRect)dirtyRect
+{
+	if( _dropHighlight == PXListViewDropAbove )
+	{
+		[[NSColor selectedControlColor] set];
+		NSRect		theBox = [self bounds];
+		theBox.origin.y += theBox.size.height -1;
+		theBox.size.height = 2;
+		[NSBezierPath setDefaultLineWidth: 2];
+		[NSBezierPath strokeRect: theBox];
+	}
+	else if( _dropHighlight == PXListViewDropOn )
+	{
+		[[NSColor selectedControlColor] set];
+		NSRect		theBox = [self bounds];
+		[NSBezierPath setDefaultLineWidth: 2];
+		[NSBezierPath strokeRect: NSInsetRect(theBox,1,1)];
+	}
+}
+
+
+#pragma mark -
 #pragma mark Reusing Cells
 
 - (void)prepareForReuse
 {
+	_dropHighlight = PXListViewDropNowhere;
 }
 
 #pragma mark -

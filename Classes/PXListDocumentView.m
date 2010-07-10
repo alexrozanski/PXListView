@@ -13,7 +13,8 @@
 
 @implementation PXListDocumentView
 
-@synthesize listView;
+@synthesize listView = _listView;
+@synthesize showsDropHighlight = _showsDropHighlight;
 
 - (BOOL)isFlipped
 {
@@ -23,6 +24,26 @@
 - (void)mouseDown:(NSEvent *)theEvent
 {
 	[[self listView] handleMouseDownOutsideCells: theEvent];
+}
+
+
+-(void)	drawRect:(NSRect)dirtyRect
+{
+	if( _showsDropHighlight )
+	{
+		CGFloat		lineWidth = 2;
+		CGFloat		lineWidthHalf = lineWidth / 2.0;
+		
+		[[NSColor selectedControlColor] set];
+		[NSBezierPath setDefaultLineWidth: lineWidth];
+		[NSBezierPath strokeRect: NSInsetRect([self visibleRect], lineWidthHalf, lineWidthHalf)];
+	}
+}
+
+-(void)	setShowsDropHighlight:(BOOL)inState
+{
+	_showsDropHighlight = inState;
+	[self setNeedsDisplayInRect: [self visibleRect]];
 }
 
 @end

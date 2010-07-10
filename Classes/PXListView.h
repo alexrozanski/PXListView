@@ -54,6 +54,9 @@
 
 - (void)			scrollRowToVisible: (NSInteger)row;
 
--(NSImage*)	dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell offset: (NSPointPointer)dragImageOffset;
+-(NSImage*)			dragImageForRowsWithIndexes: (NSIndexSet *)dragRows
+						event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell
+						offset: (NSPointPointer)dragImageOffset;
+-(void)				setShowsDropHighlight: (BOOL)inState;
 
 @end

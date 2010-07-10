@@ -742,6 +742,12 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
+-(void)	setShowsDropHighlight: (BOOL)inState
+{
+	[[self documentView] setShowsDropHighlight: inState];
+}
+
+
 #pragma mark -
 #pragma mark Sizing
 

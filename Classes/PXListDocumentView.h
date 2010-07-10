@@ -10,10 +10,13 @@
 
 @class PXListView;
 
-@interface PXListDocumentView : NSView {
-	PXListView *listView;
+@interface PXListDocumentView : NSView
+{
+	PXListView	*_listView;
+	BOOL		_showsDropHighlight;
 }
 
-@property (assign) PXListView *listView;
+@property (assign) PXListView	*listView;
+@property (assign) BOOL			showsDropHighlight;
 
 @end
