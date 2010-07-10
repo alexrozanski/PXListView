@@ -45,7 +45,6 @@
 		_reusableCells = [[NSMutableArray alloc] init];
 		_visibleCells = [[NSMutableArray alloc] init];
 		_selectedRows = [[NSMutableIndexSet alloc] init];
-		_allowsMultipleSelection = YES;
 	}
 	
 	return self;
