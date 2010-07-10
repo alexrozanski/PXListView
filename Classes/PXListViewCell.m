@@ -9,6 +9,8 @@
 #import "PXListViewCell.h"
 #import "PXListViewCell+Private.h"
 
+#import <iso646.h>
+
 #import "PXListView.h"
 #import "PXListView+Private.h"
 
@@ -43,8 +45,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-	PXListView *listView = [self listView];
-	[listView handleMouseDown: theEvent inCell: self];
+	[[self listView] handleMouseDown: theEvent inCell: self];
 }
 
 - (BOOL)isSelected
@@ -57,6 +58,71 @@
 
 - (void)prepareForReuse
 {
+}
+
+#pragma mark -
+#pragma mark Accessibility
+
+-(NSArray*)	accessibilityAttributeNames
+{
+	NSMutableArray*	attribs = [[[super accessibilityAttributeNames] mutableCopy] autorelease];
+	
+	[attribs addObject: NSAccessibilityRoleAttribute];
+	[attribs addObject: NSAccessibilityEnabledAttribute];
+	
+	return attribs;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute;
+{
+	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
+		or [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+	{
+		return NO;
+	}
+	else
+		return [super accessibilityIsAttributeSettable: attribute];
+}
+
+-(id)	accessibilityAttributeValue: (NSString *)attribute
+{
+	if( [attribute isEqualToString: NSAccessibilityRoleAttribute] )
+	{
+		return NSAccessibilityRowRole;
+	}
+	else if( [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+	{
+		return [NSNumber numberWithBool: YES];
+	}
+	else
+		return [super accessibilityAttributeValue: attribute];
+}
+
+
+-(NSArray *)	accessibilityActionNames
+{
+	return [NSArray arrayWithObjects: NSAccessibilityPressAction, nil];
+}
+
+
+-(NSString *)	accessibilityActionDescription: (NSString *)action
+{
+	return NSAccessibilityActionDescription(action);
+}
+
+
+-(void)	accessibilityPerformAction: (NSString *)action
+{
+	if( [action isEqualToString: NSAccessibilityPressAction] )
+	{
+		[[self listView] handleMouseDown: nil inCell: self];
+	}
+}
+
+
+- (BOOL)accessibilityIsIgnored
+{
+	return NO;
 }
 
 @end

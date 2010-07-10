@@ -348,7 +348,9 @@
 
 - (void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
-	BOOL		shouldToggle = ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
+	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
+	
+	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
 	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
 	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
 	
@@ -506,6 +508,73 @@
 	_currentRange = [self visibleRange];
 	
 	_inLiveResize = NO;
+}
+
+#pragma mark -
+#pragma mark Accessibility
+
+-(NSArray*)	accessibilityAttributeNames
+{
+	NSMutableArray*	attribs = [[[super accessibilityAttributeNames] mutableCopy] autorelease];
+	
+	[attribs addObject: NSAccessibilityRoleAttribute];
+	[attribs addObject: NSAccessibilityVisibleChildrenAttribute];
+	[attribs addObject: NSAccessibilitySelectedChildrenAttribute];
+	[attribs addObject: NSAccessibilityOrientationAttribute];
+	[attribs addObject: NSAccessibilityEnabledAttribute];
+	
+	return attribs;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute;
+{
+	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
+		or [attribute isEqualToString: NSAccessibilityVisibleChildrenAttribute]
+		or [attribute isEqualToString: NSAccessibilitySelectedChildrenAttribute]
+		or [attribute isEqualToString: NSAccessibilityContentsAttribute]
+		or [attribute isEqualToString: NSAccessibilityOrientationAttribute]
+		or [attribute isEqualToString: NSAccessibilityChildrenAttribute]
+		or [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+	{
+		return NO;
+	}
+	else
+		return [super accessibilityIsAttributeSettable: attribute];
+}
+
+
+-(id)	accessibilityAttributeValue: (NSString *)attribute
+{
+	if( [attribute isEqualToString: NSAccessibilityRoleAttribute] )
+	{
+		return NSAccessibilityListRole;
+	}
+	else if( [attribute isEqualToString: NSAccessibilityVisibleChildrenAttribute]
+				|| [attribute isEqualToString: NSAccessibilityContentsAttribute]
+				|| [attribute isEqualToString: NSAccessibilityChildrenAttribute] )
+	{
+		return _visibleCells;
+	}
+	else if( [attribute isEqualToString: NSAccessibilitySelectedChildrenAttribute] )
+	{
+		return [self visibleCellsForRowIndexes: _selectedRows];
+	}
+	else if( [attribute isEqualToString: NSAccessibilityOrientationAttribute] )
+	{
+		return NSAccessibilityVerticalOrientationValue;
+	}
+	else if( [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+	{
+		return [NSNumber numberWithBool: YES];
+	}
+	else
+		return [super accessibilityAttributeValue: attribute];
+}
+
+
+-(BOOL)	accessibilityIsIgnored
+{
+	return NO;
 }
 
 @end

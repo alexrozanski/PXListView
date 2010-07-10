@@ -8,6 +8,8 @@
 
 #import "MyListViewCell.h"
 
+#import <iso646.h>
+
 
 @implementation MyListViewCell
 
@@ -62,6 +64,54 @@
 	NSSize titleSize = [title sizeWithAttributes:attributes];
 	[title drawAtPoint:NSMakePoint(5, NSMaxY(bounds)-titleSize.height-5) withAttributes:attributes];
 	[attributes release];
+}
+
+
+#pragma mark -
+#pragma mark Accessibility
+
+-(NSArray*)	accessibilityAttributeNames
+{
+	NSMutableArray*	attribs = [[[super accessibilityAttributeNames] mutableCopy] autorelease];
+	
+	[attribs addObject: NSAccessibilityRoleAttribute];
+	[attribs addObject: NSAccessibilityDescriptionAttribute];
+	[attribs addObject: NSAccessibilityTitleAttribute];
+	[attribs addObject: NSAccessibilityEnabledAttribute];
+	
+	return attribs;
+}
+
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute;
+{
+	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
+		or [attribute isEqualToString: NSAccessibilityDescriptionAttribute]
+		or [attribute isEqualToString: NSAccessibilityTitleAttribute]
+		or [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+	{
+		return NO;
+	}
+	else
+		return [super accessibilityIsAttributeSettable: attribute];
+}
+
+-(id)	accessibilityAttributeValue: (NSString *)attribute
+{
+	if( [attribute isEqualToString: NSAccessibilityRoleAttribute] )
+	{
+		return NSAccessibilityButtonRole;
+	}
+	else if( [attribute isEqualToString: NSAccessibilityDescriptionAttribute]
+			or [attribute isEqualToString: NSAccessibilityTitleAttribute] )
+	{
+		return title;
+	}
+	else if( [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+	{
+		return [NSNumber numberWithBool: YES];
+	}
+	else
+		return [super accessibilityAttributeValue: attribute];
 }
 
 @end
