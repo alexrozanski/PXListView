@@ -330,7 +330,9 @@
 		}
 	}
 	
+	#if DEBUG
 	NSLog(@"No of cells in view hierarchy: %d", [_visibleCells count]);
+	#endif
 	
 	_currentRange = visibleRange;
 }
