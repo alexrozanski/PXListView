@@ -45,14 +45,14 @@
 	if( _dropHighlight == PXListViewDropAbove )	// DropAbove means after last cell.
 	{
 		CGFloat		lineWidth = 2.0f;
-		CGFloat		lineWidthHalf = lineWidth / 2.0f;
-		NSRect		theBox = [self bounds];
+		NSRect		theBox = [_listView rectOfRow: [_listView numberOfRows] -1];
 		
-		// +++ Calc rect for line below last item.
+		theBox.origin.y += theBox.size.height -2.0f;
+		theBox.size.height = 2.0f;
 		
 		[[NSColor selectedControlColor] set];
 		[NSBezierPath setDefaultLineWidth: lineWidth];
-		[NSBezierPath strokeRect: NSInsetRect(theBox, lineWidthHalf, lineWidthHalf)];
+		[NSBezierPath strokeRect: theBox];
 	}
 }
 

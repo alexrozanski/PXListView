@@ -248,6 +248,12 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	[self deselectRowIndexes: _selectedRows];
 }
 
+
+-(NSUInteger)		numberOfRows
+{
+	return _numberOfRows;
+}
+
 #pragma mark -
 #pragma mark Cell Handling
 

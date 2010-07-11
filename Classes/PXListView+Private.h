@@ -30,5 +30,6 @@
 
 - (void)			contentViewBoundsDidChange: (NSNotification *)notification;
 
+-(NSUInteger)		numberOfRows;
 
 @end
