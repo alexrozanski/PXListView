@@ -795,6 +795,100 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+	if( ![_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
+		return NSDragOperationNone;
+	
+	NSUInteger				dropRow;
+	PXListViewDropHighlight	dropHighlight;
+
+	// +++ set the drop row and operation to sensible defaults.
+	
+	NSDragOperation	theOperation = [_delegate listView: self validateDrop: sender proposedRow: dropRow
+													proposedDropHighlight: dropHighlight];
+	
+	if( dropRow != _dropRow
+		|| dropHighlight != _dropHighlight )
+	{
+		_dropRow = dropRow;
+		_dropHighlight = dropHighlight;
+		
+		[self setNeedsDisplay: YES];
+	}
+	
+	return theOperation;
+}
+
+
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender /* if the destination responded to draggingEntered: but not to draggingUpdated: the return value from draggingEntered: is used */
+{
+	NSUInteger				dropRow;
+	PXListViewDropHighlight	dropHighlight;
+
+	// +++ set the drop row and operation to sensible defaults.
+	
+	NSDragOperation	theOperation = [_delegate listView: self validateDrop: sender proposedRow: dropRow
+													proposedDropHighlight: dropHighlight];
+	
+	if( dropRow != _dropRow
+		|| dropHighlight != _dropHighlight )
+	{
+		_dropRow = dropRow;
+		_dropHighlight = dropHighlight;
+		
+		[self setNeedsDisplay: YES];
+	}
+	
+	return theOperation;
+}
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender
+{
+	[self setShowsDropHighlight: YES];
+}
+
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+{
+	
+}
+
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+	
+}
+
+
+- (void)concludeDragOperation:(id <NSDraggingInfo>)sender
+{
+	
+	[self setShowsDropHighlight: NO];
+}
+
+
+- (void)draggingEnded:(id <NSDraggingInfo>)sender
+{
+	
+	[self setShowsDropHighlight: NO];
+}
+
+
+- (BOOL)wantsPeriodicDraggingUpdates
+{
+	return YES;
+}
+
+
+-(void)	setDropRow: (NSUInteger)row dropHighlight: (PXListViewDropHighlight)dropHighlight
+{
+	_dropRow = row;
+	_dropHighlight = dropHighlight;
+	
+	[self setNeedsDisplay: YES];
+}
+
 #pragma mark -
 #pragma mark Sizing
 

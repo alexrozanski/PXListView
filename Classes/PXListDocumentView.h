@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "PXListViewCell.h"
+#import "PXListViewDropHighlight.h"
 
 
 @class PXListView;

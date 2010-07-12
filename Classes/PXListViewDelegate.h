@@ -7,6 +7,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "PXListViewDropHighlight.h"
+
 
 @class PXListView, PXListViewCell;
 
@@ -19,5 +21,7 @@
 
 @optional
 - (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;
+- (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
+							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
 
 @end

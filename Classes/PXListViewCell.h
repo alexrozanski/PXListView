@@ -7,18 +7,12 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "PXListViewDropHighlight.h"
 
 
 @class PXListView;
 
 
-enum PXListViewDropHighlight
-{
-	PXListViewDropNowhere = 0,
-	PXListViewDropOn,
-	PXListViewDropAbove
-};
-typedef NSUInteger PXListViewDropHighlight;
 
 @interface PXListViewCell : NSView
 {

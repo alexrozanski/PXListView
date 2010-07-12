@@ -33,6 +33,9 @@
 	BOOL				_allowsEmptySelection;
 	BOOL				_allowsMultipleSelection;
 	BOOL				_verticalMotionCanBeginDrag;
+	
+	NSUInteger				_dropRow;
+	PXListViewDropHighlight	_dropHighlight;
 }
 
 @property (readwrite, assign) IBOutlet id <PXListViewDelegate>	delegate;
@@ -58,5 +61,6 @@
 						event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell
 						offset: (NSPointPointer)dragImageOffset;
 -(void)				setShowsDropHighlight: (BOOL)inState;
+-(void)				setDropRow: (NSUInteger)row dropHighlight:(PXListViewDropHighlight)dropHighlight;
 
 @end
