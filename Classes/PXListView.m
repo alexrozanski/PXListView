@@ -526,9 +526,19 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	if( _allowsEmptySelection )
 		[self deselectRows];
 	else if( _numberOfRows > 1 )
-		[self setSelectedRow: _numberOfRows -1];
-	// else if ( !_allowsEmptySelection and _numberOfRows <=1 )
-	//	Nothing to do. Can't unselect last or no item.
+	{
+		NSUInteger	idx = 0;
+		NSPoint		pos = [self convertPoint: [theEvent locationInWindow] fromView: nil];
+		for( NSUInteger x = 0; x < _numberOfRows; x++ )
+		{
+			if( _cellYOffsets[x] > pos.y )
+				break;
+			
+			idx = x;
+		}
+		
+		[self setSelectedRow: idx];
+	}
 }
 
 #pragma mark -
