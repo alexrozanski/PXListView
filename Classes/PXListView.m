@@ -615,6 +615,41 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
+-(BOOL)	validateMenuItem: (NSMenuItem *)menuItem
+{
+	if( [menuItem action] == @selector(selectAll:) )
+	{
+		return _allowsMultipleSelection && [_selectedRows count] != _numberOfRows;	// No "select all" if everything's already selected or we can only select one row.
+	}
+	else if( [menuItem action] == @selector(deselectAll:) )
+	{
+		return _allowsEmptySelection && [_selectedRows count] != 0;	// No "deselect all" if nothing's selected or we must have at least one row selected.
+	}
+	else
+		return NO;
+}
+
+
+-(void)	selectAll: (id)sender
+{
+#pragma unused(sender)
+	if( _allowsMultipleSelection )
+	{
+		[self setSelectedRows: [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, _numberOfRows)]];
+	}
+}
+
+
+
+-(void)	deselectAll: (id)sender
+{
+#pragma unused(sender)
+	if( _allowsMultipleSelection )
+	{
+		[self setSelectedRows: [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, _numberOfRows)]];
+	}
+}
+
 
 #pragma mark -
 #pragma mark Layout
