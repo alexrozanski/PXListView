@@ -26,7 +26,8 @@
 {
 	[listView setCellSpacing: 2.0f];
 	//[listView setAllowsEmptySelection: YES];
-	//[listView setAllowsMultipleSelection: YES];
+	[listView setAllowsMultipleSelection: YES];
+	[listView registerForDraggedTypes: [NSArray arrayWithObjects: NSStringPboardType, nil]];
 	
 	_listItems = [[NSMutableArray alloc] init];
 
@@ -88,6 +89,12 @@
 	[dragPasteboard setString: @"Just Testing" forType: NSStringPboardType];
 	
 	return YES;
+}
+
+- (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
+							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
+{
+	return NSDragOperationCopy;
 }
 
 @end
