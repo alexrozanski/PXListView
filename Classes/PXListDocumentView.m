@@ -50,7 +50,7 @@
 		theBox.origin.y += theBox.size.height -2.0f;
 		theBox.size.height = 2.0f;
 		
-		[[NSColor selectedControlColor] set];
+		[[NSColor alternateSelectedControlColor] set];
 		[NSBezierPath setDefaultLineWidth: lineWidth];
 		[NSBezierPath strokeRect: theBox];
 	}
