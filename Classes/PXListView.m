@@ -837,7 +837,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 -(void)	setShowsDropHighlight: (BOOL)inState
 {
-	[[self documentView] setDropHighlight: PXListViewDropOn];
+	[[self documentView] setDropHighlight: (inState ? PXListViewDropOn : PXListViewDropNowhere)];
 }
 
 
