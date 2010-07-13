@@ -21,4 +21,6 @@
 @property (assign) PXListView				*listView;
 @property (assign) PXListViewDropHighlight	dropHighlight;
 
+-(void)	setDropHighlight: (PXListViewDropHighlight)inState;
+
 @end

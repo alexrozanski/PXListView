@@ -837,30 +837,59 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 -(void)	setShowsDropHighlight: (BOOL)inState
 {
-	[[self documentView] setShowsDropHighlight: inState];
+	[[self documentView] setDropHighlight: PXListViewDropOn];
+}
+
+
+-(NSUInteger)	indexOfRowAtPoint: (NSPoint)pos returningProposedDropHighlight: (PXListViewDropHighlight*)outDropHighlight
+{
+	*outDropHighlight = PXListViewDropOn;
+	
+	if( _numberOfRows > 0 )
+	{
+		NSUInteger	idx = 0;
+		for( NSUInteger x = 0; x < _numberOfRows; x++ )
+		{
+			if( _cellYOffsets[x] > pos.y )
+				break;
+			
+			idx = x;
+		}
+		
+		return idx;
+	}
+	else
+		return NSUIntegerMax;
 }
 
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-	if( ![_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
-		return NSDragOperationNone;
+	NSDragOperation	theOperation = NSDragOperationNone;
 	
-	NSUInteger				dropRow;
-	PXListViewDropHighlight	dropHighlight;
+	NSUInteger				oldDropRow = _dropRow;
+	PXListViewDropHighlight	oldDropHighlight = _dropHighlight;
 
-	// +++ set the drop row and operation to sensible defaults.
-	
-	NSDragOperation	theOperation = [_delegate listView: self validateDrop: sender proposedRow: dropRow
-													proposedDropHighlight: dropHighlight];
-	
-	if( dropRow != _dropRow
-		|| dropHighlight != _dropHighlight )
+	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
 	{
-		_dropRow = dropRow;
-		_dropHighlight = dropHighlight;
+		_dropRow = [self indexOfRowAtPoint: [self convertPoint: [sender draggingLocation] fromView: nil] returningProposedDropHighlight: &_dropHighlight];
 		
-		[self setNeedsDisplay: YES];
+		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
+														proposedDropHighlight: _dropHighlight];
+	}
+	
+	if( theOperation != NSDragOperationNone )
+	{
+		if( oldDropRow != _dropRow
+			|| oldDropHighlight != _dropHighlight )
+		{
+			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
+			
+			[self setShowsDropHighlight: YES];
+			[oldCell setDropHighlight: PXListViewDropNowhere];
+			[newCell setDropHighlight: _dropHighlight];
+		}
 	}
 	
 	return theOperation;
@@ -869,53 +898,70 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender /* if the destination responded to draggingEntered: but not to draggingUpdated: the return value from draggingEntered: is used */
 {
-	NSUInteger				dropRow;
-	PXListViewDropHighlight	dropHighlight;
+	NSDragOperation	theOperation = NSDragOperationNone;
+	
+	NSUInteger				oldDropRow = _dropRow;
+	PXListViewDropHighlight	oldDropHighlight = _dropHighlight;
 
-	// +++ set the drop row and operation to sensible defaults.
-	
-	NSDragOperation	theOperation = [_delegate listView: self validateDrop: sender proposedRow: dropRow
-													proposedDropHighlight: dropHighlight];
-	
-	if( dropRow != _dropRow
-		|| dropHighlight != _dropHighlight )
+	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
 	{
-		_dropRow = dropRow;
-		_dropHighlight = dropHighlight;
+		_dropRow = [self indexOfRowAtPoint: [self convertPoint: [sender draggingLocation] fromView: nil] returningProposedDropHighlight: &_dropHighlight];
 		
-		[self setNeedsDisplay: YES];
+		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
+														proposedDropHighlight: _dropHighlight];
 	}
+	
+	if( theOperation != NSDragOperationNone )
+	{
+		if( oldDropRow != _dropRow
+			|| oldDropHighlight != _dropHighlight )
+		{
+			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
+			
+			[self setShowsDropHighlight: YES];
+			[oldCell setDropHighlight: PXListViewDropNowhere];
+			[newCell setDropHighlight: _dropHighlight];
+		}
+	
+	}
+	else
+		[self setShowsDropHighlight: NO];
 	
 	return theOperation;
 }
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
-	[self setShowsDropHighlight: YES];
-}
-
-
-- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
-{
+	PXListViewCell*	oldCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+	[oldCell setDropHighlight: PXListViewDropNowhere];
 	
+	[self setShowsDropHighlight: NO];
 }
 
 
+//- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+//{
+//	
+//}
+//
+//
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
-	
+	return YES;	// +++ Let delegate process and return.
 }
 
 
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
 {
 	
-	[self setShowsDropHighlight: NO];
 }
 
 
 - (void)draggingEnded:(id <NSDraggingInfo>)sender
 {
+	PXListViewCell*	oldCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+	[oldCell setDropHighlight: PXListViewDropNowhere];
 	
 	[self setShowsDropHighlight: NO];
 }

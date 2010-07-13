@@ -72,7 +72,7 @@
 #pragma unused(dirtyRect)
 	if( _dropHighlight == PXListViewDropAbove )
 	{
-		[[NSColor selectedControlColor] set];
+		[[NSColor alternateSelectedControlColor] set];
 		NSRect		theBox = [self bounds];
 		theBox.origin.y += theBox.size.height -1.0f;
 		theBox.size.height = 2.0f;
@@ -81,7 +81,7 @@
 	}
 	else if( _dropHighlight == PXListViewDropOn )
 	{
-		[[NSColor selectedControlColor] set];
+		[[NSColor alternateSelectedControlColor] set];
 		NSRect		theBox = [self bounds];
 		[NSBezierPath setDefaultLineWidth: 2.0f];
 		[NSBezierPath strokeRect: NSInsetRect(theBox,1.0f,1.0f)];
