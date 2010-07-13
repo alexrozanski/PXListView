@@ -479,6 +479,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
 	
+	BOOL		tryDraggingAgain = YES;
 	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
 	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
 	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
@@ -499,13 +500,19 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			[self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
 		else if( !isSelected && !shouldToggle )
 			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-		// else
-		//	do nothing if it's already selected and we're not toggling.
+		else if( isSelected && !shouldToggle && [_selectedRows count] != 1 )
+		{
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+			tryDraggingAgain = NO;
+		}
 	}
 	else if( shouldToggle && _allowsEmptySelection )
 	{
 		if( isSelected )
+		{
 			[self deselectRowIndexes: clickedIndexSet];
+			tryDraggingAgain = NO;
+		}
 		else
 			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
 	}
@@ -515,7 +522,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 	
 	// If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
-	if( theEvent and [_selectedRows containsIndex: [theCell row]] )
+	if( tryDraggingAgain && theEvent and [_selectedRows containsIndex: [theCell row]] )
 		[self attemptDragWithMouseDown: theEvent inCell: theCell];
 }
 
@@ -768,12 +775,16 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		
 		for( PXListViewCell* currCell in _visibleCells )
 		{
-			NSRect				rowRect = [self rectOfRow: [currCell row]];
-			NSBitmapImageRep*	bir = [currCell bitmapImageRepForCachingDisplayInRect: [currCell bounds]];
-			[currCell cacheDisplayInRect: [currCell bounds] toBitmapImageRep: bir];
-			NSPoint				thePos = NSMakePoint( rowRect.origin.x -minX, rowRect.origin.y -minY);
-			thePos.y = imageSize.height -(thePos.y +rowRect.size.height);	// Document view is flipped, so flip the coordinates before drawing into image, or the list items will be reversed.
-			[bir drawAtPoint: thePos];
+			NSUInteger		currRow = [currCell row];
+			if( [dragRows containsIndex: currRow] )
+			{ 
+				NSRect				rowRect = [self rectOfRow: currRow];
+				NSBitmapImageRep*	bir = [currCell bitmapImageRepForCachingDisplayInRect: [currCell bounds]];
+				[currCell cacheDisplayInRect: [currCell bounds] toBitmapImageRep: bir];
+				NSPoint				thePos = NSMakePoint( rowRect.origin.x -minX, rowRect.origin.y -minY);
+				thePos.y = imageSize.height -(thePos.y +rowRect.size.height);	// Document view is flipped, so flip the coordinates before drawing into image, or the list items will be reversed.
+				[bir drawAtPoint: thePos];
+			}
 		}
 		
 	[dragImage unlockFocus];
