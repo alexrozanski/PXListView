@@ -856,6 +856,15 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			idx = x;
 		}
 		
+		CGFloat		cellHeight = _cellYOffsets[idx+1] -_cellYOffsets[idx];
+		if( pos.y < (_cellYOffsets[idx] +(cellHeight / 3.0)) )
+			*outDropHighlight = PXListViewDropAbove;
+		else if( pos.y > (_cellYOffsets[idx+1] -(cellHeight / 3.0)) )
+		{
+			idx++;
+			*outDropHighlight = PXListViewDropAbove;
+		}
+		
 		return idx;
 	}
 	else
@@ -886,7 +895,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
 			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
 			
-			[self setShowsDropHighlight: YES];
+			[[self documentView] setDropHighlight: (_dropRow == _numberOfRows ? PXListViewDropAbove : PXListViewDropOn)];
 			[oldCell setDropHighlight: PXListViewDropNowhere];
 			[newCell setDropHighlight: _dropHighlight];
 		}
