@@ -658,7 +658,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	NSRect frame = [self frame];
 	NSSize frameSize = NSMakeSize(NSWidth(frame), NSHeight(frame));
-	BOOL hasVertScroller = NSHeight(frame)<_totalHeight;
+	BOOL hasVertScroller = NSHeight(frame) < _totalHeight;
 	NSSize availableSize = [[self class] contentSizeForFrameSize:frameSize
 										   hasHorizontalScroller:NO
 											 hasVerticalScroller:hasVertScroller
@@ -704,7 +704,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		_totalHeight = totalHeight;
 		
 		NSRect bounds = [self bounds];
-		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
+		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight: (NSHeight(bounds) -2);
 		
 		[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self bounds]), documentHeight)];
 	}
@@ -719,7 +719,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 	
 	NSRect bounds = [self bounds];
-	CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
+	CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight: (NSHeight(bounds) -2);
 	
 	//Set the new height of the document view
 	[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self contentViewRect]), documentHeight)];
