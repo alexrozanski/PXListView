@@ -15,6 +15,19 @@
 
 @synthesize title = _title;
 
+#if DEBUG
+// Counter for the amount of current cells
++ (void)updateCount:(BOOL)status {
+	static NSInteger count = 0;
+	if (status) {
+		count++;
+	} else {
+		count--;
+	}
+	NSLog(@"Current amount of allocated cells: %d", count);
+}
+#endif
+
 #pragma mark -
 #pragma mark Init/Dealloc
 
@@ -22,7 +35,10 @@
 {
 	if(( self = [super initWithReusableIdentifier: identifier] ))
 	{
-		
+#if DEBUG
+		NSLog(@"Allocating cell");
+		[MyListViewCell updateCount:YES];
+#endif
 	}
 	
 	return self;
@@ -30,6 +46,10 @@
 
 - (void)	dealloc
 {
+#if DEBUG
+	NSLog(@"Deallocating cell");
+	[MyListViewCell updateCount:NO];
+#endif
 	[_title release];
 	[super dealloc];
 }
@@ -39,6 +59,9 @@
 
 - (void)	prepareForReuse
 {
+#if DEBUG
+	NSLog(@"Reusing cell");
+#endif
 	[_title release];
 	_title = nil;
 }

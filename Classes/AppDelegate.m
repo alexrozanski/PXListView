@@ -97,4 +97,10 @@
 	return NSDragOperationCopy;
 }
 
+- (IBAction) reloadTable: (id)sender
+{
+#pragma unused(sender)
+	[listView reloadData];
+}
+
 @end

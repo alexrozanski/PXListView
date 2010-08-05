@@ -18,4 +18,6 @@
 	NSMutableArray		*_listItems;
 }
 
+- (IBAction) reloadTable: (id)sender;
+
 @end
