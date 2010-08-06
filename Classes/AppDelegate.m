@@ -24,9 +24,10 @@
 
 -(void)	awakeFromNib
 {
-	[listView setCellSpacing: 2];
+	[listView setCellSpacing: 2.0f];
 	//[listView setAllowsEmptySelection: YES];
-	//[listView setAllowsMultipleSelection: YES];
+	[listView setAllowsMultipleSelection: YES];
+	[listView registerForDraggedTypes: [NSArray arrayWithObjects: NSStringPboardType, nil]];
 	
 	_listItems = [[NSMutableArray alloc] init];
 
@@ -50,12 +51,13 @@
 #pragma mark -
 #pragma mark List View Delegate Methods
 
-- (NSInteger)numberOfRowsInListView:(PXListView*)aListView
+- (NSUInteger)numberOfRowsInListView: (PXListView*)aListView
 {
+#pragma unused(aListView)
 	return [_listItems count];
 }
 
-- (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSInteger)row
+- (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSUInteger)row
 {
 	MyListViewCell *cell = (MyListViewCell*)[aListView dequeueCellWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER];
 	
@@ -63,15 +65,36 @@
 		cell = [[[MyListViewCell alloc] initWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER] autorelease];
 	}
 	
-	//Set up the new cell
-	[cell setTitle:[_listItems objectAtIndex:row]];
+	// Set up the new cell:
+	[cell setTitle: [_listItems objectAtIndex: row]];
 	
 	return cell;
 }
 
-- (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSInteger)row
+- (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSUInteger)row
 {
+#pragma unused(aListView)
+#pragma unused(row)
 	return 50;
+}
+
+
+// The following are only needed for drag'n drop:
+- (BOOL)	listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)dragPasteboard
+{
+#pragma unused(aListView)
+#pragma unused(rowIndexes)
+	// +++ Actually drag the items, not just dummy data.
+	[dragPasteboard declareTypes: [NSArray arrayWithObjects: NSStringPboardType, nil] owner: self];
+	[dragPasteboard setString: @"Just Testing" forType: NSStringPboardType];
+	
+	return YES;
+}
+
+- (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
+							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
+{
+	return NSDragOperationCopy;
 }
 
 @end

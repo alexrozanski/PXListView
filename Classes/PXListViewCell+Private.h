@@ -7,5 +7,7 @@
 //
 
 @interface PXListViewCell ()
-@property (readwrite) NSInteger row;
+
+@property (readwrite) NSUInteger row;
+
 @end

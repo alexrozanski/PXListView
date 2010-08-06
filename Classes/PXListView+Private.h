@@ -15,9 +15,11 @@
 - (void)			layoutCell: (PXListViewCell*)cell;
 
 - (void)			addCellsFromVisibleRange;
-- (void)			addNewVisibleCell: (PXListViewCell*)cell atRow: (NSInteger)row;
-- (PXListViewCell*)	visibleCellForRow: (NSInteger)row;
+- (void)			addNewVisibleCell: (PXListViewCell*)cell atRow: (NSUInteger)row;
+- (PXListViewCell*)	visibleCellForRow: (NSUInteger)row;
 - (NSArray*)		visibleCellsForRowIndexes: (NSIndexSet*)rows;
+
+- (void)			deselectRowIndexes: (NSIndexSet*)rows;
 
 - (void)			updateCells;
 
@@ -25,5 +27,9 @@
 
 - (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
 - (void)			handleMouseDownOutsideCells: (NSEvent*)theEvent;
+
+- (void)			contentViewBoundsDidChange: (NSNotification *)notification;
+
+-(NSUInteger)		numberOfRows;
 
 @end

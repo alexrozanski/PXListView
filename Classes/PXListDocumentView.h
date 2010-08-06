@@ -7,13 +7,20 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "PXListViewDropHighlight.h"
+
 
 @class PXListView;
 
-@interface PXListDocumentView : NSView {
-	PXListView *listView;
+@interface PXListDocumentView : NSView
+{
+	PXListView				*_listView;
+	PXListViewDropHighlight	_dropHighlight;
 }
 
-@property (assign) PXListView *listView;
+@property (assign) PXListView				*listView;
+@property (assign) PXListViewDropHighlight	dropHighlight;
+
+-(void)	setDropHighlight: (PXListViewDropHighlight)inState;
 
 @end

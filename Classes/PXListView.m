@@ -6,6 +6,7 @@
 //  Copyright 2010 Alex Rozanski. http://perspx.com. All rights reserved.
 //
 
+#pragma mark Headers
 
 #import "PXListView.h"
 #import "PXListView+Private.h"
@@ -16,12 +17,93 @@
 #import "PXListViewCell+Private.h"
 
 
+#pragma mark Helpers
+
+// Apple sadly doesn't provide CGFloat variants of these:
+#if CGFLOAT_IS_DOUBLE
+#define CGFLOATABS(n)	fabs(n)
+#else
+#define CGFLOATABS(n)	fabsf(n)
+#endif
+
+// This is a renamed copy of UKIsDragStart from <http://github.com/uliwitness/UliKit>:
+
+// Possible return values from UKIsDragStart:
+enum
+{
+	PXIsDragStartMouseReleased = 0,
+	PXIsDragStartTimedOut,
+	PXIsDragStartMouseMovedHorizontally,
+	PXIsDragStartMouseMovedVertically
+};
+typedef NSInteger PXIsDragStartResult;
+
+static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval theTimeout )
+{
+	if( theTimeout == 0.0 )
+		theTimeout = 1.5;
+	
+	NSPoint			startPos = [startEvent locationInWindow];
+	NSTimeInterval	startTime = [NSDate timeIntervalSinceReferenceDate];
+	NSDate*			expireTime = [NSDate dateWithTimeIntervalSinceReferenceDate: startTime +theTimeout];
+	
+	NSAutoreleasePool	*pool = nil;
+	while( ([expireTime timeIntervalSinceReferenceDate] -[NSDate timeIntervalSinceReferenceDate]) > 0 )
+	{
+		[pool release];
+		pool = [[NSAutoreleasePool alloc] init];
+		
+		NSEvent*	currEvent = [NSApp nextEventMatchingMask: NSLeftMouseUpMask | NSRightMouseUpMask | NSOtherMouseUpMask
+															| NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask
+									untilDate: expireTime inMode: NSEventTrackingRunLoopMode dequeue: YES];
+		if( currEvent )
+		{
+			switch( [currEvent type] )
+			{
+				case NSLeftMouseUp:
+				case NSRightMouseUp:
+				case NSOtherMouseUp:
+				{
+					[pool release];
+					return PXIsDragStartMouseReleased;	// Mouse released within the wait time.
+					break;
+				}
+				
+				case NSLeftMouseDragged:
+				case NSRightMouseDragged:
+				case NSOtherMouseDragged:
+				{
+					NSPoint	newPos = [currEvent locationInWindow];
+					CGFloat	xMouseMovement = CGFLOATABS(newPos.x -startPos.x),
+							yMouseMovement = CGFLOATABS(newPos.y -startPos.y);
+					if( xMouseMovement > 2 or yMouseMovement > 2 )
+					{
+						[pool release];
+						return (xMouseMovement > yMouseMovement) ? PXIsDragStartMouseMovedHorizontally : PXIsDragStartMouseMovedVertically;	// Mouse moved within the wait time, probably a drag!
+					}
+					break;
+				}
+			}
+		}
+		
+	}
+	
+	[pool release];
+	return PXIsDragStartTimedOut;	// If they held the mouse that long, they probably wanna drag.
+}
+
+
+
+#pragma mark -
+
+
 @implementation PXListView
 
 @synthesize delegate = _delegate;
 @synthesize cellSpacing = _cellSpacing;
 @synthesize allowsMultipleSelection = _allowsMultipleSelection;
 @synthesize allowsEmptySelection = _allowsEmptySelection;
+@synthesize verticalMotionCanBeginDrag = _verticalMotionCanBeginDrag;
 
 #pragma mark -
 #pragma mark Init/Dealloc
@@ -54,7 +136,7 @@
 {
 	//Subscribe to scrolling notification
 	NSClipView *contentView = [self contentView];
-	[contentView setPostsBoundsChangedNotifications:YES];
+	[contentView setPostsBoundsChangedNotifications: YES];
 	
     [[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(contentViewBoundsDidChange:)
@@ -107,18 +189,18 @@
 }
 
 
-- (void)setSelectedRow: (NSInteger)row
+- (void)	setSelectedRow: (NSUInteger)row
 {
 	[self selectRowIndexes: [NSIndexSet indexSetWithIndex: row] byExtendingSelection: NO];
 }
 
 
--(NSInteger)	selectedRow
+-(NSUInteger)	selectedRow
 {
 	if( [_selectedRows count] == 1 )
 		return [_selectedRows firstIndex];
 	else
-		return -1;	// This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
+		return NSUIntegerMax;	// This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
 }
 
 
@@ -137,7 +219,7 @@
 - (void)selectRowIndexes: (NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend
 {
 	if( !doExtend )
-		[self deselectRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
+		[self deselectRowIndexes: _selectedRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
 	
 	[_selectedRows addIndexes: rows];	// _selectedRows is empty if !doExtend, because we just deselected all.
 
@@ -164,6 +246,12 @@
 -(void)	deselectRows
 {
 	[self deselectRowIndexes: _selectedRows];
+}
+
+
+-(NSUInteger)		numberOfRows
+{
+	return _numberOfRows;
 }
 
 #pragma mark -
@@ -202,34 +290,40 @@
 
 - (NSRange)visibleRange
 {
-	NSRect visibleRect = [[self contentView] documentVisibleRect];
-	NSInteger startRow = -1;
-	NSInteger endRow = -1;
+	NSRect		visibleRect = [[self contentView] documentVisibleRect];
+	NSUInteger	startRow = NSUIntegerMax;
+	NSUInteger	endRow = NSUIntegerMax;
 	
 	BOOL inRange = NO;
-	for(NSInteger i=0;i<_numberOfRows;i++) {
-		if(NSIntersectsRect([self rectOfRow:i], visibleRect)) {
-			if(startRow==-1) {
+	for( NSUInteger i = 0; i < _numberOfRows; i++ )
+	{
+		if( NSIntersectsRect([self rectOfRow:i], visibleRect) )
+		{
+			if( startRow == NSUIntegerMax )
+			{
 				startRow = i;
 				inRange = YES;
 			}
 		}
-		else {
-			if(inRange) {
+		else
+		{
+			if(inRange)
+			{
 				endRow = i;
 				break;
 			}
 		}
 	}
 	
-	if(endRow==-1) {
+	if( endRow == NSUIntegerMax )
+	{
 		endRow = _numberOfRows; 
 	}
 	
 	return NSMakeRange(startRow, endRow-startRow);
 }
 
--(PXListViewCell*)	visibleCellForRow: (NSInteger)row
+-(PXListViewCell*)	visibleCellForRow: (NSUInteger)row
 {
 	PXListViewCell *outCell = nil;
 	
@@ -268,7 +362,8 @@
 	{
 		NSRange visibleRange = [self visibleRange];
 		
-		for(NSInteger i=visibleRange.location;i<NSMaxRange(visibleRange);i++) {
+		for( NSUInteger i = visibleRange.location; i < NSMaxRange(visibleRange); i++ )
+		{
 			id cell = [delegate listView:self cellForRow:i];
 			[_visibleCells addObject:cell];
 			[self addNewVisibleCell:cell atRow:i];
@@ -276,46 +371,54 @@
 	}
 }
 
-- (void)updateCells
+- (void)	updateCells
 {	
-	if(_inLiveResize) {
+	if(_inLiveResize)
+	{
 		return;
 	}
 	
 	NSRange visibleRange = [self visibleRange];
 	NSRange intersectionRange = NSIntersectionRange(visibleRange, _currentRange);
 	
-	if(visibleRange.location==_currentRange.location&&
-	   NSMaxRange(visibleRange)==NSMaxRange(_currentRange)) {
+	if( visibleRange.location == _currentRange.location
+		and NSMaxRange(visibleRange) == NSMaxRange(_currentRange) )
+	{
 		return;
 	}
 	
-	if(intersectionRange.location==0&&intersectionRange.length==0) {
+	if( intersectionRange.location == 0 and intersectionRange.length == 0 )
+	{
 		//We'll have to rebuild all the cells
 		[_reusableCells addObjectsFromArray:_visibleCells];
 		[_visibleCells removeAllObjects];
 		[[self documentView] setSubviews:[NSArray array]];
 		[self addCellsFromVisibleRange];
 	}
-	else {
-		if(visibleRange.location<_currentRange.location) { //Add top 
-			for(NSInteger i=_currentRange.location;i>visibleRange.location;i--)
+	else
+	{
+		if( visibleRange.location < _currentRange.location ) //Add top 
+		{
+			for( NSUInteger i = _currentRange.location; i > visibleRange.location; i-- )
 			{
-				NSInteger newRow = i-1;
+				NSUInteger newRow = i -1;
 				PXListViewCell *cell = [[self delegate] listView:self cellForRow:newRow];
-				[_visibleCells insertObject:cell atIndex:0];
+				[_visibleCells insertObject: cell atIndex: 0];
 				[self addNewVisibleCell:cell atRow:newRow];
 			}
 		}
-		else if(visibleRange.location>_currentRange.location) { //Remove top
-			for(NSInteger i=visibleRange.location;i>_currentRange.location;i--) {
+		else if( visibleRange.location > _currentRange.location ) //Remove top
+		{
+			for( NSUInteger i = visibleRange.location; i > _currentRange.location; i-- )
+			{
 				PXListViewCell *firstCell = [_visibleCells objectAtIndex:0];
 				[self enqueueCell:firstCell];
 			}
 		}
 		
-		if(NSMaxRange(visibleRange)>NSMaxRange(_currentRange)) { //Add bottom
-			for(NSInteger i=NSMaxRange(_currentRange);i<NSMaxRange(visibleRange);i++)
+		if( NSMaxRange(visibleRange) > NSMaxRange(_currentRange) ) //Add bottom
+		{
+			for( NSUInteger i = NSMaxRange(_currentRange); i < NSMaxRange(visibleRange); i++ )
 			{
 				NSInteger newRow = i;
 				PXListViewCell *cell = [[self delegate] listView:self cellForRow:newRow];
@@ -323,8 +426,10 @@
 				[self addNewVisibleCell:cell atRow:newRow];
 			}
 		}
-		else if(NSMaxRange(visibleRange)<NSMaxRange(_currentRange)) { //Remove bottom
-			for(NSInteger i=NSMaxRange(_currentRange);i>NSMaxRange(visibleRange);i--) {
+		else if(NSMaxRange(visibleRange)<NSMaxRange(_currentRange)) //Remove bottom
+		{
+			for( NSUInteger i = NSMaxRange(_currentRange); i > NSMaxRange(visibleRange); i-- )
+			{
 				PXListViewCell *lastCell = [_visibleCells lastObject];
 				[self enqueueCell:lastCell];
 			}
@@ -338,7 +443,7 @@
 	_currentRange = visibleRange;
 }
 
-- (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSInteger)row
+- (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSUInteger)row
 {
 	[[self documentView] addSubview:cell];
 	[cell setListView:self];
@@ -348,13 +453,40 @@
 }
 
 
+- (BOOL)	attemptDragWithMouseDown: (NSEvent*)theEvent inCell: (PXListViewCell*)theCell
+{
+	PXIsDragStartResult	dragResult = PXIsDragStart( theEvent, 0.0 );
+	if( dragResult != PXIsDragStartMouseReleased /*&& (_verticalMotionCanBeginDrag || dragResult != PXIsDragStartMouseMovedVertically)*/ )	// Was a drag, not a click? Cool!
+	{
+		NSPoint			dragImageOffset = NSZeroPoint;
+		NSImage			*dragImage = [self dragImageForRowsWithIndexes: _selectedRows event: theEvent clickedCell: theCell offset: &dragImageOffset];
+		NSPasteboard	*dragPasteboard = [NSPasteboard pasteboardWithUniqueName];
+		
+		if( [_delegate respondsToSelector: @selector(listView:writeRowsWithIndexes:toPasteboard:)]
+			and [_delegate listView: self writeRowsWithIndexes: _selectedRows toPasteboard: dragPasteboard] )
+		{
+			[theCell dragImage: dragImage at: dragImageOffset offset: NSZeroSize event: theEvent
+						pasteboard: dragPasteboard source: self slideBack: YES];
+			
+			return YES;
+		}
+	}
+	
+	return NO;
+}
+
 - (void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
 	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
 	
+	BOOL		tryDraggingAgain = YES;
 	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
 	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
 	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
+	
+	// If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
+	if( theEvent and isSelected and [self attemptDragWithMouseDown: theEvent inCell: theCell] )
+		return;
 	
 	if( _allowsMultipleSelection )
 	{
@@ -368,13 +500,19 @@
 			[self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
 		else if( !isSelected && !shouldToggle )
 			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-		// else
-		//	do nothing if it's already selected and we're not toggling.
+		else if( isSelected && !shouldToggle && [_selectedRows count] != 1 )
+		{
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+			tryDraggingAgain = NO;
+		}
 	}
 	else if( shouldToggle && _allowsEmptySelection )
 	{
 		if( isSelected )
+		{
 			[self deselectRowIndexes: clickedIndexSet];
+			tryDraggingAgain = NO;
+		}
 		else
 			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
 	}
@@ -382,17 +520,32 @@
 	{
 		[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
 	}
+	
+	// If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
+	if( tryDraggingAgain && theEvent and [_selectedRows containsIndex: [theCell row]] )
+		[self attemptDragWithMouseDown: theEvent inCell: theCell];
 }
 
 
 - (void)	handleMouseDownOutsideCells: (NSEvent*)theEvent
 {
+#pragma unused(theEvent)
 	if( _allowsEmptySelection )
 		[self deselectRows];
 	else if( _numberOfRows > 1 )
-		[self setSelectedRow: _numberOfRows -1];
-	// else if ( !_allowsEmptySelection and _numberOfRows <=1 )
-	//	Nothing to do. Can't unselect last or no item.
+	{
+		NSUInteger	idx = 0;
+		NSPoint		pos = [self convertPoint: [theEvent locationInWindow] fromView: nil];
+		for( NSUInteger x = 0; x < _numberOfRows; x++ )
+		{
+			if( _cellYOffsets[x] > pos.y )
+				break;
+			
+			idx = x;
+		}
+		
+		[self setSelectedRow: idx];
+	}
 }
 
 #pragma mark -
@@ -430,7 +583,8 @@
 
 -(void)	moveUp:(id)sender
 {
-	NSInteger		newSelectedRow = [_selectedRows firstIndex];
+#pragma unused(sender)
+	NSUInteger		newSelectedRow = [_selectedRows firstIndex];
 	if( [_selectedRows count] == 0 )
 		newSelectedRow = _numberOfRows -1;	// NSTableView defaults to selecting last row for up-arrow w/o selection.
 	else
@@ -446,7 +600,8 @@
 
 -(void)	moveDown:(id)sender
 {
-	NSInteger		newSelectedRow = [_selectedRows lastIndex];
+#pragma unused(sender)
+	NSUInteger		newSelectedRow = [_selectedRows lastIndex];
 	if( [_selectedRows count] == 0 )
 		newSelectedRow = 0;	// NSTableView defaults to selecting first row for down-arrow w/o selection.
 	else
@@ -459,6 +614,41 @@
 	[self scrollRowToVisible: newSelectedRow];
 }
 
+
+-(BOOL)	validateMenuItem: (NSMenuItem *)menuItem
+{
+	if( [menuItem action] == @selector(selectAll:) )
+	{
+		return _allowsMultipleSelection && [_selectedRows count] != _numberOfRows;	// No "select all" if everything's already selected or we can only select one row.
+	}
+	else if( [menuItem action] == @selector(deselectAll:) )
+	{
+		return _allowsEmptySelection && [_selectedRows count] != 0;	// No "deselect all" if nothing's selected or we must have at least one row selected.
+	}
+	else
+		return NO;
+}
+
+
+-(void)	selectAll: (id)sender
+{
+#pragma unused(sender)
+	if( _allowsMultipleSelection )
+	{
+		[self setSelectedRows: [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, _numberOfRows)]];
+	}
+}
+
+
+
+-(void)	deselectAll: (id)sender
+{
+#pragma unused(sender)
+	if( _allowsMultipleSelection )
+	{
+		[self setSelectedRows: [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, _numberOfRows)]];
+	}
+}
 
 
 #pragma mark -
@@ -474,10 +664,10 @@
 											 hasVerticalScroller:hasVertScroller
 													  borderType:[self borderType]];
 	
-	return NSMakeRect(0, 0, availableSize.width, availableSize.height);
+	return NSMakeRect(0.0f, 0.0f, availableSize.width, availableSize.height);
 }
 
-- (NSRect)rectOfRow:(NSInteger)row
+- (NSRect)rectOfRow:(NSUInteger)row
 {
 	id <PXListViewDelegate> delegate = [self delegate];
 	
@@ -486,7 +676,7 @@
 		NSRect contentViewRect = [self contentViewRect];
 		CGFloat rowHeight = [delegate listView:self heightOfRow:row];
 		
-		return NSMakeRect(0, _cellYOffsets[row], NSWidth(contentViewRect), rowHeight);
+		return NSMakeRect(0.0f, _cellYOffsets[row], NSWidth(contentViewRect), rowHeight);
 	}
 	
 	return NSZeroRect;
@@ -496,18 +686,19 @@
 {
 	id <PXListViewDelegate> delegate = [self delegate];
 	
-	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
+	if( [delegate conformsToProtocol:@protocol(PXListViewDelegate)] )
 	{
 		CGFloat totalHeight = 0;
 		
 		//Allocate the offset caching array
 		_cellYOffsets = (CGFloat*)malloc(sizeof(CGFloat)*_numberOfRows);
 		
-		for(NSInteger i=0;i<_numberOfRows;i++) {
+		for( NSUInteger i = 0; i < _numberOfRows; i++ )
+		{
 			_cellYOffsets[i] = totalHeight;
 			CGFloat cellHeight = [delegate listView:self heightOfRow:i];
 			
-			totalHeight+=cellHeight+[self cellSpacing];
+			totalHeight += cellHeight +[self cellSpacing];
 		}
 		
 		_totalHeight = totalHeight;
@@ -515,7 +706,7 @@
 		NSRect bounds = [self bounds];
 		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
 		
-		[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self bounds]), documentHeight)];
+		[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self bounds]), documentHeight)];
 	}
 }
 
@@ -531,7 +722,7 @@
 	CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
 	
 	//Set the new height of the document view
-	[[self documentView] setFrame:NSMakeRect(0, 0, NSWidth([self contentViewRect]), documentHeight)];
+	[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self contentViewRect]), documentHeight)];
 }
 
 - (void)layoutCell:(PXListViewCell*)cell
@@ -562,13 +753,14 @@
 
 - (void)contentViewBoundsDidChange:(NSNotification *)notification
 {
+#pragma unused(notification)
 	[self updateCells];
 }
 
 
-- (void)	scrollRowToVisible: (NSInteger)row
+- (void)	scrollRowToVisible: (NSUInteger)row
 {
-	if( row < 0 || row >= _numberOfRows )
+	if( row >= _numberOfRows )
 		return;
 	
 	NSRect		rowRect = [self rectOfRow: row];
@@ -580,6 +772,214 @@
 	[self reflectScrolledClipView: [self contentView]];
 }
 
+
+#pragma mark -
+#pragma mark Drag and Drop
+
+-(NSImage*)	dragImageForRowsWithIndexes: (NSIndexSet *)dragRows event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell offset: (NSPointPointer)dragImageOffset
+{
+#pragma unused(dragEvent)
+	CGFloat		minX = CGFLOAT_MAX, maxX = CGFLOAT_MIN,
+				minY = CGFLOAT_MAX, maxY = CGFLOAT_MIN;
+	NSPoint		localMouse = [self convertPoint: NSZeroPoint fromView: clickedCell];
+	
+	// Determine how large an image we'll need to hold all cells, with their
+	//	*unclipped* rectangles:
+	for( PXListViewCell* currCell in _visibleCells )
+	{
+		NSUInteger		currRow = [currCell row];
+		if( [dragRows containsIndex: currRow] )
+		{
+			NSRect		rowRect = [self rectOfRow: currRow];
+			if( rowRect.origin.x < minX )
+				minX = rowRect.origin.x;
+			if( rowRect.origin.y < minY )
+				minY = rowRect.origin.y;
+			if( NSMaxX(rowRect) > maxX )
+				maxX = NSMaxX(rowRect);
+			if( NSMaxY(rowRect) > maxY )
+				maxY = NSMaxY(rowRect);
+		}
+	}
+	
+	// Now draw all cells into the image at the proper relative position:Just Testing
+	NSSize		imageSize = NSMakeSize( maxX -minX, maxY -minY);
+	NSImage*	dragImage = [[[NSImage alloc] initWithSize: imageSize] autorelease];
+	
+	[dragImage lockFocus];
+		
+		for( PXListViewCell* currCell in _visibleCells )
+		{
+			NSUInteger		currRow = [currCell row];
+			if( [dragRows containsIndex: currRow] )
+			{ 
+				NSRect				rowRect = [self rectOfRow: currRow];
+				NSBitmapImageRep*	bir = [currCell bitmapImageRepForCachingDisplayInRect: [currCell bounds]];
+				[currCell cacheDisplayInRect: [currCell bounds] toBitmapImageRep: bir];
+				NSPoint				thePos = NSMakePoint( rowRect.origin.x -minX, rowRect.origin.y -minY);
+				thePos.y = imageSize.height -(thePos.y +rowRect.size.height);	// Document view is flipped, so flip the coordinates before drawing into image, or the list items will be reversed.
+				[bir drawAtPoint: thePos];
+			}
+		}
+		
+	[dragImage unlockFocus];
+	
+	// Give caller the right offset so the image ends up right atop the actual views:
+	if( dragImageOffset )
+	{
+		dragImageOffset->x = -(localMouse.x -minX);
+		dragImageOffset->y = (localMouse.y -minY) -imageSize.height;
+	}
+	
+	return dragImage;
+}
+
+
+-(void)	setShowsDropHighlight: (BOOL)inState
+{
+	[[self documentView] setDropHighlight: (inState ? PXListViewDropOn : PXListViewDropNowhere)];
+}
+
+
+-(NSUInteger)	indexOfRowAtPoint: (NSPoint)pos returningProposedDropHighlight: (PXListViewDropHighlight*)outDropHighlight
+{
+	*outDropHighlight = PXListViewDropOn;
+	
+	if( _numberOfRows > 0 )
+	{
+		NSUInteger	idx = 0;
+		for( NSUInteger x = 0; x < _numberOfRows; x++ )
+		{
+			if( _cellYOffsets[x] > pos.y )
+				break;
+			
+			idx = x;
+		}
+		
+		return idx;
+	}
+	else
+		return NSUIntegerMax;
+}
+
+
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+	NSDragOperation	theOperation = NSDragOperationNone;
+	
+	NSUInteger				oldDropRow = _dropRow;
+	PXListViewDropHighlight	oldDropHighlight = _dropHighlight;
+
+	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
+	{
+		_dropRow = [self indexOfRowAtPoint: [self convertPoint: [sender draggingLocation] fromView: nil] returningProposedDropHighlight: &_dropHighlight];
+		
+		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
+														proposedDropHighlight: _dropHighlight];
+	}
+	
+	if( theOperation != NSDragOperationNone )
+	{
+		if( oldDropRow != _dropRow
+			|| oldDropHighlight != _dropHighlight )
+		{
+			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
+			
+			[self setShowsDropHighlight: YES];
+			[oldCell setDropHighlight: PXListViewDropNowhere];
+			[newCell setDropHighlight: _dropHighlight];
+		}
+	}
+	
+	return theOperation;
+}
+
+
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender /* if the destination responded to draggingEntered: but not to draggingUpdated: the return value from draggingEntered: is used */
+{
+	NSDragOperation	theOperation = NSDragOperationNone;
+	
+	NSUInteger				oldDropRow = _dropRow;
+	PXListViewDropHighlight	oldDropHighlight = _dropHighlight;
+
+	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
+	{
+		_dropRow = [self indexOfRowAtPoint: [self convertPoint: [sender draggingLocation] fromView: nil] returningProposedDropHighlight: &_dropHighlight];
+		
+		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
+														proposedDropHighlight: _dropHighlight];
+	}
+	
+	if( theOperation != NSDragOperationNone )
+	{
+		if( oldDropRow != _dropRow
+			|| oldDropHighlight != _dropHighlight )
+		{
+			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
+			
+			[self setShowsDropHighlight: YES];
+			[oldCell setDropHighlight: PXListViewDropNowhere];
+			[newCell setDropHighlight: _dropHighlight];
+		}
+	
+	}
+	else
+		[self setShowsDropHighlight: NO];
+	
+	return theOperation;
+}
+
+- (void)draggingExited:(id <NSDraggingInfo>)sender
+{
+	PXListViewCell*	oldCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+	[oldCell setDropHighlight: PXListViewDropNowhere];
+	
+	[self setShowsDropHighlight: NO];
+}
+
+
+//- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+//{
+//	
+//}
+//
+//
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+	return YES;	// +++ Let delegate process and return.
+}
+
+
+- (void)concludeDragOperation:(id <NSDraggingInfo>)sender
+{
+	
+}
+
+
+- (void)draggingEnded:(id <NSDraggingInfo>)sender
+{
+	PXListViewCell*	oldCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
+	[oldCell setDropHighlight: PXListViewDropNowhere];
+	
+	[self setShowsDropHighlight: NO];
+}
+
+
+- (BOOL)wantsPeriodicDraggingUpdates
+{
+	return YES;
+}
+
+
+-(void)	setDropRow: (NSUInteger)row dropHighlight: (PXListViewDropHighlight)dropHighlight
+{
+	_dropRow = row;
+	_dropHighlight = dropHighlight;
+	
+	[self setNeedsDisplay: YES];
+}
 
 #pragma mark -
 #pragma mark Sizing
@@ -621,7 +1021,7 @@
 	return attribs;
 }
 
-- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute;
+- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute
 {
 	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
 		or [attribute isEqualToString: NSAccessibilityVisibleChildrenAttribute]
