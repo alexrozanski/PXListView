@@ -38,8 +38,11 @@ Thanks to [Mike Abdullah][4] for optimizations related to cell dequeuing.
 
 Thanks to [Uli Kusterer][5] for additions and fixes to PXListView including momentum scrolling, keyboard navigation, changes to variable row heights (using CGFloats) and accessibility.
 
+Thanks to [Tom][6] for fixing a memory issue with reloading data. 
+
   [1]: http://perspx.com/blog/archives/1427/making-list-views-really-fast/
   [2]: http://www.atebits.com/tweetie-mac/
   [3]: http://www.echofon.com/twitter/mac/
   [4]: http://mikeabdullah.net/
   [5]: http://github.com/uliwitness
+  [6]: http://github.com/TvdW
