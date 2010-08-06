@@ -168,8 +168,14 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	id <PXListViewDelegate> delegate = [self delegate];
 	
-	//Clean up cached resources
-	[_reusableCells removeAllObjects];
+	//Move all visible cells to the reusable cells array
+	//for (NSUInteger i = 0, NSUInteger k = [_visibleCells count]; i < k; i++) {
+	NSUInteger k = [_visibleCells count];
+	for (NSUInteger i = 0; i < k; i++) {
+		PXListViewCell *cell = [_visibleCells objectAtIndex:i];
+		[_reusableCells addObject:cell];
+		[cell setHidden:YES];
+	}
 	[_visibleCells removeAllObjects];
 	free(_cellYOffsets);
 	
