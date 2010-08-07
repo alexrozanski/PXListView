@@ -714,7 +714,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		NSRect bounds = [self bounds];
 		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:NSHeight(bounds);
 		
-		[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self bounds]), documentHeight)];
+		[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self contentViewRect]), documentHeight)];
 	}
 }
 
