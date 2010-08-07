@@ -21,13 +21,13 @@
 	return YES;
 }
 
-- (void)mouseDown:(NSEvent *)theEvent
+- (void)mouseDown:(NSEvent*)theEvent
 {
 	[[self listView] handleMouseDownOutsideCells: theEvent];
 }
 
 
--(void)	drawRect: (NSRect)dirtyRect
+- (void)drawRect:(NSRect)dirtyRect
 {
 #pragma unused(dirtyRect)
 	
@@ -56,7 +56,7 @@
 	}
 }
 
--(void)	setDropHighlight: (PXListViewDropHighlight)inState
+- (void)setDropHighlight:(PXListViewDropHighlight)inState
 {
 	_dropHighlight = inState;
 	[self setNeedsDisplayInRect: [self visibleRect]];

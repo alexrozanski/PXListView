@@ -12,55 +12,55 @@
 #import "PXListViewCell.h"
 
 
-@interface PXListView : NSScrollView
-{
+@interface PXListView : NSScrollView {
 	id <PXListViewDelegate> _delegate;
 	
-	NSMutableArray		*_reusableCells;
-	NSMutableArray		*_visibleCells;
-	NSRange				_currentRange;
+	NSMutableArray *_reusableCells;
+	NSMutableArray *_visibleCells;
+	NSRange _currentRange;
 	
-	NSUInteger			_numberOfRows;
-	NSMutableIndexSet	*_selectedRows;
+	NSUInteger _numberOfRows;
+	NSMutableIndexSet *_selectedRows;
 	
-	NSRange				_visibleRange;
-	CGFloat				_totalHeight;
-	CGFloat				*_cellYOffsets;
+	NSRange	_visibleRange;
+	CGFloat	_totalHeight;
+	CGFloat	*_cellYOffsets;
 	
-	CGFloat				_cellSpacing;
+	CGFloat	_cellSpacing;
 	
-	BOOL				_inLiveResize;
-	BOOL				_allowsEmptySelection;
-	BOOL				_allowsMultipleSelection;
-	BOOL				_verticalMotionCanBeginDrag;
+	BOOL _inLiveResize;
+	BOOL _allowsEmptySelection;
+	BOOL _allowsMultipleSelection;
+	BOOL _verticalMotionCanBeginDrag;
 	
-	NSUInteger				_dropRow;
+	NSUInteger _dropRow;
 	PXListViewDropHighlight	_dropHighlight;
 }
 
 @property (readwrite, assign) IBOutlet id <PXListViewDelegate>	delegate;
-@property (readwrite, assign) CGFloat							cellSpacing;
-@property (readwrite, retain) NSIndexSet*						selectedRows;
-@property (readwrite, assign) NSUInteger						selectedRow;	// shorthand for selectedRows.
-@property (readwrite, assign) BOOL								allowsEmptySelection;
-@property (readwrite, assign) BOOL								allowsMultipleSelection;
-@property (readwrite, assign) BOOL								verticalMotionCanBeginDrag;
+@property (readwrite, assign) CGFloat cellSpacing;
+@property (readwrite, retain) NSIndexSet* selectedRows;
+@property (readwrite, assign) NSUInteger selectedRow;	// shorthand for selectedRows.
+@property (readwrite, assign) BOOL allowsEmptySelection;
+@property (readwrite, assign) BOOL allowsMultipleSelection;
+@property (readwrite, assign) BOOL verticalMotionCanBeginDrag;
 
-- (void)			reloadData;
+- (void)reloadData;
 
-- (PXListViewCell*)	dequeueCellWithReusableIdentifier: (NSString*)identifier;
+- (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
 
-- (NSRange)			visibleRange;
-- (NSRect)			rectOfRow: (NSUInteger)row;
-- (void)			deselectRows;
-- (void)			selectRowIndexes:(NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend;
+- (NSRange)visibleRange;
+- (NSRect)rectOfRow: (NSUInteger)row;
+- (void)deselectRows;
+- (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend;
 
-- (void)			scrollRowToVisible: (NSUInteger)row;
+- (void)scrollRowToVisible: (NSUInteger)row;
 
--(NSImage*)			dragImageForRowsWithIndexes: (NSIndexSet *)dragRows
-						event: (NSEvent*)dragEvent clickedCell: (PXListViewCell*)clickedCell
-						offset: (NSPointPointer)dragImageOffset;
--(void)				setShowsDropHighlight: (BOOL)inState;
--(void)				setDropRow: (NSUInteger)row dropHighlight:(PXListViewDropHighlight)dropHighlight;
+-(NSImage*)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows
+								 event:(NSEvent*)dragEvent
+						   clickedCell:(PXListViewCell*)clickedCell
+								offset:(NSPointPointer)dragImageOffset;
+- (void)setShowsDropHighlight: (BOOL)inState;
+- (void)setDropRow: (NSUInteger)row dropHighlight:(PXListViewDropHighlight)dropHighlight;
 
 @end
