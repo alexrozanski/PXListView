@@ -277,7 +277,10 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 	
 	//Search backwards looking for a match since removing from end of array is generally quicker
-	for(NSUInteger i = [_reusableCells count]-1; i>=0;i--)
+	// Tom: Somehow i was getting <0 here, because you i>=0 is always true for unsigned integers. Temporarily made this an integer.
+	// Tom: This was only a bug for lists using multiple identifiers for its cells.
+	// Tom: NSInteger shouldn't be a problem here - nobody will have more than 2.1 billion active cells.
+	for(NSInteger i = [_reusableCells count]-1; i>=0;i--)
 	{
 		PXListViewCell *cell = [_reusableCells objectAtIndex:i];
 		
