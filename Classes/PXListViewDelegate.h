@@ -15,13 +15,15 @@
 @protocol PXListViewDelegate <NSObject>
 
 @required
-- (NSUInteger)		numberOfRowsInListView: (PXListView*)aListView;
-- (PXListViewCell*)	listView: (PXListView*)aListView cellForRow: (NSUInteger)row;
-- (CGFloat)			listView: (PXListView*)aListView heightOfRow: (NSUInteger)row;
+- (NSUInteger) numberOfRowsInListView:(PXListView*)aListView;
+- (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSUInteger)row;
+- (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSUInteger)row;
 
 @optional
-- (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;
-- (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
-							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
+- (BOOL)listView:(PXListView*)aListView writeRowsWithIndexes:(NSIndexSet *)rowIndexes toPasteboard:(NSPasteboard *)pboard;
+- (NSDragOperation)listView:(PXListView*)aListView
+			   validateDrop:(id <NSDraggingInfo>)info
+				proposedRow:(NSUInteger)row
+	  proposedDropHighlight:(PXListViewDropHighlight)dropHighlight;
 
 @end

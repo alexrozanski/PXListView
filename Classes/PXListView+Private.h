@@ -6,30 +6,39 @@
 //  Copyright 2010 Alex Rozanski. http://perspx.com. All rights reserved.
 //
 
+// This is a renamed copy of UKIsDragStart from <http://github.com/uliwitness/UliKit>:
+// Possible return values from UKIsDragStart:
+enum
+{
+	PXIsDragStartMouseReleased = 0,
+	PXIsDragStartTimedOut,
+	PXIsDragStartMouseMovedHorizontally,
+	PXIsDragStartMouseMovedVertically
+};
+typedef NSInteger PXIsDragStartResult;
+
 @interface PXListView ()
 
-- (NSRect)			contentViewRect;
+- (NSRect)contentViewRect;
 
-- (void)			cacheCellLayout;
-- (void)			layoutCells;
-- (void)			layoutCell: (PXListViewCell*)cell;
+- (void)cacheCellLayout;
+- (void)layoutCells;
+- (void)layoutCell:(PXListViewCell*)cell;
 
-- (void)			addCellsFromVisibleRange;
-- (void)			addNewVisibleCell: (PXListViewCell*)cell atRow: (NSUInteger)row;
-- (PXListViewCell*)	visibleCellForRow: (NSUInteger)row;
-- (NSArray*)		visibleCellsForRowIndexes: (NSIndexSet*)rows;
+- (void)addCellsFromVisibleRange;
+- (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSUInteger)row;
+- (PXListViewCell*)visibleCellForRow:(NSUInteger)row;
+- (NSArray*)visibleCellsForRowIndexes:(NSIndexSet*)rows;
 
-- (void)			deselectRowIndexes: (NSIndexSet*)rows;
+- (NSUInteger)numberOfRows;
+- (void)deselectRowIndexes:(NSIndexSet*)rows;
 
-- (void)			updateCells;
+- (void)updateCells;
+- (void)enqueueCell:(PXListViewCell*)cell;
 
-- (void)			enqueueCell: (PXListViewCell*)cell;
+- (void)handleMouseDown:(NSEvent*)theEvent	inCell:(PXListViewCell*)theCell;
+- (void)handleMouseDownOutsideCells:(NSEvent*)theEvent;
 
-- (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
-- (void)			handleMouseDownOutsideCells: (NSEvent*)theEvent;
-
-- (void)			contentViewBoundsDidChange: (NSNotification *)notification;
-
--(NSUInteger)		numberOfRows;
+- (void)contentViewBoundsDidChange:(NSNotification *)notification;
 
 @end
