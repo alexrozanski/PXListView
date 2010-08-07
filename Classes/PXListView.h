@@ -50,17 +50,17 @@
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
 
 - (NSRange)visibleRange;
-- (NSRect)rectOfRow: (NSUInteger)row;
+- (NSRect)rectOfRow:(NSUInteger)row;
 - (void)deselectRows;
-- (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend;
+- (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection:(BOOL)doExtend;
 
-- (void)scrollRowToVisible: (NSUInteger)row;
+- (void)scrollRowToVisible:(NSUInteger)row;
 
--(NSImage*)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows
+-(NSImage*)dragImageForRowsWithIndexes:(NSIndexSet*)dragRows
 								 event:(NSEvent*)dragEvent
 						   clickedCell:(PXListViewCell*)clickedCell
 								offset:(NSPointPointer)dragImageOffset;
-- (void)setShowsDropHighlight: (BOOL)inState;
-- (void)setDropRow: (NSUInteger)row dropHighlight:(PXListViewDropHighlight)dropHighlight;
+- (void)setShowsDropHighlight:(BOOL)inState;
+- (void)setDropRow:(NSUInteger)row dropHighlight:(PXListViewDropHighlight)dropHighlight;
 
 @end
