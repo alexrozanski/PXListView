@@ -782,6 +782,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	CGFloat		minX = CGFLOAT_MAX, maxX = CGFLOAT_MIN,
 				minY = CGFLOAT_MAX, maxY = CGFLOAT_MIN;
 	NSPoint		localMouse = [self convertPoint: NSZeroPoint fromView: clickedCell];
+	localMouse.y += [self documentVisibleRect].origin.y;
 	
 	// Determine how large an image we'll need to hold all cells, with their
 	//	*unclipped* rectangles:
