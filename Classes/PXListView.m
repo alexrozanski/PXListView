@@ -979,6 +979,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
+#pragma unused(sender)
 	PXListViewCell*	oldCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
 	[oldCell setDropHighlight: PXListViewDropNowhere];
 	
@@ -994,18 +995,20 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 //
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
+#pragma unused(sender)
 	return YES;	// +++ Let delegate process and return.
 }
 
 
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
 {
-	
+#pragma unused(sender)	
 }
 
 
 - (void)draggingEnded:(id <NSDraggingInfo>)sender
 {
+#pragma unused(sender)
 	PXListViewCell*	oldCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
 	[oldCell setDropHighlight: PXListViewDropNowhere];
 	

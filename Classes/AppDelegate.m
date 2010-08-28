@@ -94,6 +94,10 @@
 - (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
 							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
 {
+#pragma unused(aListView)
+#pragma unused(info)
+#pragma unused(row)
+#pragma unused(dropHighlight)
 	return NSDragOperationCopy;
 }
 
