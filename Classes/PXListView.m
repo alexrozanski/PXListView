@@ -134,7 +134,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (void)awakeFromNib
 {
-	//Subscribe to scrolling notification
+	// Subscribe to scrolling notification:
 	NSClipView *contentView = [self contentView];
 	[contentView setPostsBoundsChangedNotifications: YES];
 	
@@ -143,7 +143,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 												 name:NSViewBoundsDidChangeNotification
 											   object:contentView];
 	
-	//Tag ourselves onto the document view
+	// Tag ourselves onto the document view:
 	[[self documentView] setListView:self];
 }
 
@@ -803,7 +803,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		}
 	}
 	
-	// Now draw all cells into the image at the proper relative position:Just Testing
+	// Now draw all cells into the image at the proper relative position:
 	NSSize		imageSize = NSMakeSize( maxX -minX, maxY -minY);
 	NSImage*	dragImage = [[[NSImage alloc] initWithSize: imageSize] autorelease];
 	
@@ -844,6 +844,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 -(NSUInteger)	indexOfRowAtPoint: (NSPoint)pos returningProposedDropHighlight: (PXListViewDropHighlight*)outDropHighlight
 {
+	//NSLog( @"====================" );
 	*outDropHighlight = PXListViewDropOn;
 	
 	if( _numberOfRows > 0 )
@@ -852,29 +853,46 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		for( NSUInteger x = 0; x < _numberOfRows; x++ )
 		{
 			if( _cellYOffsets[x] > pos.y )
+			{
+				//NSLog( @"cellYOffset[%ld] = %f > %f", x, _cellYOffsets[x], pos.y );
 				break;
+			}
 			
 			idx = x;
 		}
 		
+		//NSLog( @"idx = %ld", idx );
+		
 		CGFloat		cellHeight = _cellYOffsets[idx+1] -_cellYOffsets[idx];
+		//NSLog( @"cellHeight = %f", cellHeight );
 		if( pos.y < (_cellYOffsets[idx] +(cellHeight / 3.0)) )
+		{
 			*outDropHighlight = PXListViewDropAbove;
+			//NSLog( @"*** ABOVE %ld", idx );
+		}
 		else if( pos.y > (_cellYOffsets[idx+1] -(cellHeight / 3.0)) )
 		{
 			idx++;
 			*outDropHighlight = PXListViewDropAbove;
+			//NSLog( @"*** ABOVE %ld", idx );
 		}
+		else
+			;//NSLog( @"*** ON %ld", idx );
 		
 		return idx;
 	}
 	else
+	{
+		//NSLog( @"*** ON %d", NSUIntegerMax );
 		return NSUIntegerMax;
+	}
 }
 
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
+	//NSLog( @"draggingEntered" );
+	
 	NSDragOperation	theOperation = NSDragOperationNone;
 	
 	NSUInteger				oldDropRow = _dropRow;
@@ -887,6 +905,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
 														proposedDropHighlight: _dropHighlight];
 	}
+
+	//NSLog( @"op = %lu, row = %ld, hl = %lu", theOperation, _dropRow, _dropHighlight );
 	
 	if( theOperation != NSDragOperationNone )
 	{
@@ -896,11 +916,17 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
 			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
 			
-			[[self documentView] setDropHighlight: (_dropRow == _numberOfRows ? PXListViewDropAbove : PXListViewDropOn)];
 			[oldCell setDropHighlight: PXListViewDropNowhere];
 			[newCell setDropHighlight: _dropHighlight];
+			PXListViewDropHighlight	dropHL = ((_dropRow == _numberOfRows) ? PXListViewDropAbove : PXListViewDropOn);
+			//NSLog( @"TOTAL DROP %s", dropHL == PXListViewDropOn ? "on" : "above" );
+			[[self documentView] setDropHighlight: dropHL];
 		}
+		else
+			;//NSLog(@"TOTAL DROP unchanged");
 	}
+	else
+		;//NSLog( @"TOTAL DROP NOWHERE" );
 	
 	return theOperation;
 }
@@ -908,6 +934,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender /* if the destination responded to draggingEntered: but not to draggingUpdated: the return value from draggingEntered: is used */
 {
+	//NSLog( @"draggingUpdated" );
+	
 	NSDragOperation	theOperation = NSDragOperationNone;
 	
 	NSUInteger				oldDropRow = _dropRow;
@@ -921,6 +949,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 														proposedDropHighlight: _dropHighlight];
 	}
 	
+	//NSLog( @"op = %lu, row = %ld, hl = %lu", theOperation, _dropRow, _dropHighlight );
+	
 	if( theOperation != NSDragOperationNone )
 	{
 		if( oldDropRow != _dropRow
@@ -929,14 +959,20 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			PXListViewCell*	newCell = _dropRow == NSUIntegerMax ? nil : [self visibleCellForRow: _dropRow];
 			PXListViewCell*	oldCell = oldDropRow == NSUIntegerMax ? nil : [self visibleCellForRow: oldDropRow];
 			
-			[self setShowsDropHighlight: YES];
 			[oldCell setDropHighlight: PXListViewDropNowhere];
 			[newCell setDropHighlight: _dropHighlight];
+			PXListViewDropHighlight	dropHL = ((_dropRow == _numberOfRows) ? PXListViewDropAbove : PXListViewDropOn);
+			//NSLog( @"TOTAL DROP %s", dropHL == PXListViewDropOn ? "on" : "above" );
+			[[self documentView] setDropHighlight: dropHL];
 		}
-	
+		else
+			;//NSLog(@"TOTAL DROP unchanged");
 	}
 	else
+	{
+		//NSLog( @"TOTAL DROP NOWHERE" );
 		[self setShowsDropHighlight: NO];
+	}
 	
 	return theOperation;
 }

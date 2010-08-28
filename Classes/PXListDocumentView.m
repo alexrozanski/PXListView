@@ -30,6 +30,7 @@
 -(void)	drawRect: (NSRect)dirtyRect
 {
 #pragma unused(dirtyRect)
+	//NSLog( @"drawRect %lu", _dropHighlight );
 	
 	// We always show the outline:
 	if( _dropHighlight != PXListViewDropNowhere )
@@ -40,6 +41,7 @@
 		[[NSColor selectedControlColor] set];
 		[NSBezierPath setDefaultLineWidth: lineWidth];
 		[NSBezierPath strokeRect: NSInsetRect([self visibleRect], lineWidthHalf, lineWidthHalf)];
+		//NSLog( @"drawing drop outline" );
 	}
 	
 	if( _dropHighlight == PXListViewDropAbove )	// DropAbove means after last cell.
@@ -53,12 +55,14 @@
 		[[NSColor alternateSelectedControlColor] set];
 		[NSBezierPath setDefaultLineWidth: lineWidth];
 		[NSBezierPath strokeRect: theBox];
+		//NSLog( @"drawing drop ABOVE indicator" );
 	}
 }
 
 -(void)	setDropHighlight: (PXListViewDropHighlight)inState
 {
 	_dropHighlight = inState;
+	//NSLog( @"setDropHighlight %lu", _dropHighlight );
 	[self setNeedsDisplayInRect: [self visibleRect]];
 }
 
