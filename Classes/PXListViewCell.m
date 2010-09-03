@@ -79,6 +79,15 @@
 		[NSBezierPath setDefaultLineWidth: 2.0f];
 		[NSBezierPath strokeRect: theBox];
 	}
+	else if( _dropHighlight == PXListViewDropBelow )
+	{
+		[[NSColor alternateSelectedControlColor] set];
+		NSRect		theBox = [self bounds];
+		theBox.origin.y += 1.0f;
+		theBox.size.height = 2.0f;
+		[NSBezierPath setDefaultLineWidth: 2.0f];
+		[NSBezierPath strokeRect: theBox];
+	}
 	else if( _dropHighlight == PXListViewDropOn )
 	{
 		[[NSColor alternateSelectedControlColor] set];

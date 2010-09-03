@@ -11,6 +11,7 @@ enum PXListViewDropHighlight
 {
 	PXListViewDropNowhere = 0,
 	PXListViewDropOn,
-	PXListViewDropAbove
+	PXListViewDropAbove,
+	PXListViewDropBelow
 };
 typedef NSUInteger PXListViewDropHighlight;
