@@ -900,7 +900,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
 	{
-		_dropRow = [self indexOfRowAtPoint: [self convertPoint: [sender draggingLocation] fromView: nil] returningProposedDropHighlight: &_dropHighlight];
+		NSPoint		dragMouse = [[self documentView] convertPoint: [sender draggingLocation] fromView: nil];
+		NSLog( @"dragMouse = %@", NSStringFromPoint(dragMouse) );
+		_dropRow = [self indexOfRowAtPoint: dragMouse returningProposedDropHighlight: &_dropHighlight];
 		
 		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
 														proposedDropHighlight: _dropHighlight];
@@ -943,7 +945,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
 	{
-		_dropRow = [self indexOfRowAtPoint: [self convertPoint: [sender draggingLocation] fromView: nil] returningProposedDropHighlight: &_dropHighlight];
+		NSPoint		dragMouse = [[self documentView] convertPoint: [sender draggingLocation] fromView: nil];
+		NSLog( @"dragMouse = %@", NSStringFromPoint(dragMouse) );
+		_dropRow = [self indexOfRowAtPoint: dragMouse returningProposedDropHighlight: &_dropHighlight];
 		
 		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
 														proposedDropHighlight: _dropHighlight];
