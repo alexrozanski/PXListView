@@ -23,5 +23,7 @@
 - (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;
 - (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
 							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
+- (BOOL)			listView: (PXListView*)aListView acceptDrop: (id <NSDraggingInfo>)info
+							row:(NSUInteger)row dropHighlight: (PXListViewDropHighlight)dropHighlight;
 
 @end
