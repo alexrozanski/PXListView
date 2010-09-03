@@ -12,6 +12,11 @@
 #import "PXListViewCell.h"
 
 
+#ifndef PXLog
+#define	PXLog(...)		
+#endif
+
+
 @interface PXListView : NSScrollView
 {
 	id <PXListViewDelegate> _delegate;
