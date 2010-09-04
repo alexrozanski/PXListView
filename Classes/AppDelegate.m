@@ -14,7 +14,7 @@
 #pragma mark Constants
 
 #define LISTVIEW_CELL_IDENTIFIER		@"MyListViewCell"
-#define NUM_EXAMPLE_ITEMS				1000
+#define NUM_EXAMPLE_ITEMS				10
 
 
 @implementation AppDelegate
@@ -94,6 +94,10 @@
 - (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
 							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
 {
+#pragma unused(aListView)
+#pragma unused(info)
+#pragma unused(row)
+#pragma unused(dropHighlight)
 	return NSDragOperationCopy;
 }
 

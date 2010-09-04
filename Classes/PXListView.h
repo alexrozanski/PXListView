@@ -11,8 +11,13 @@
 #import "PXListViewDelegate.h"
 #import "PXListViewCell.h"
 
+#ifndef PXLog
+#define	PXLog(...)		
+#endif
 
-@interface PXListView : NSScrollView {
+
+@interface PXListView : NSScrollView
+{
 	id <PXListViewDelegate> _delegate;
 	
 	NSMutableArray *_reusableCells;

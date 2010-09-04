@@ -74,21 +74,23 @@
 	NSRect bounds = [self bounds];
 	NSDictionary *attributes = nil;
 	
-	//Draw the border and background
-	if([self isSelected]) {
-		[[NSColor redColor] set];
-		attributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor whiteColor], NSForegroundColorAttributeName, nil];
+	// Draw the border and background:
+	if( [self isSelected] )
+	{
+		[[NSColor selectedControlColor] set];
+		attributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor selectedControlTextColor], NSForegroundColorAttributeName, nil];
 	}
-	else {
+	else
 		[[NSColor whiteColor] set];
-	}
-	NSRectFill(dirtyRect);
-	[[NSColor blackColor] set];
-	NSFrameRect(bounds);
+
+	NSBezierPath*	roundedRect = [NSBezierPath bezierPathWithRoundedRect: [self bounds] xRadius: 6.0 yRadius: 6.0];
+	[roundedRect fill];
+	[[NSColor darkGrayColor] set];
 	
-	//Draw the title
-	NSSize titleSize = [_title sizeWithAttributes:attributes];
-	[_title drawAtPoint:NSMakePoint(5.0f, NSMaxY(bounds)-titleSize.height-5) withAttributes:attributes];
+	// Draw the title:
+	[[NSColor blackColor] set];
+	NSSize titleSize = [_title sizeWithAttributes: attributes];
+	[_title drawAtPoint: NSMakePoint(5.0f, NSMaxY(bounds)-titleSize.height-5) withAttributes: attributes];
 	[attributes release];
 	
 	[super drawRect: dirtyRect];
