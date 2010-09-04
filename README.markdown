@@ -36,7 +36,7 @@ Attributions
 
 Thanks to [Mike Abdullah][4] for optimizations related to cell dequeuing.
 
-Thanks to [Uli Kusterer][5] for additions and fixes to PXListView including momentum scrolling, keyboard navigation, changes to variable row heights (using CGFloats) and accessibility.
+Thanks to [Uli Kusterer][5] for additions and fixes to PXListView including momentum scrolling, keyboard navigation, changes to variable row heights (using CGFloats), accessibility as well as drag and drop support.
 
 Thanks to [Tom][6] for fixing a memory issue with reloading data. 
 
