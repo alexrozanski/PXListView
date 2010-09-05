@@ -115,6 +115,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		_reusableCells = [[NSMutableArray alloc] init];
 		_visibleCells = [[NSMutableArray alloc] init];
 		_selectedRows = [[NSMutableIndexSet alloc] init];
+		_allowsEmptySelection = YES;
 	}
 	
 	return self;
@@ -127,6 +128,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		_reusableCells = [[NSMutableArray alloc] init];
 		_visibleCells = [[NSMutableArray alloc] init];
 		_selectedRows = [[NSMutableIndexSet alloc] init];
+		_allowsEmptySelection = YES;
 	}
 	
 	return self;
@@ -177,7 +179,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	[_visibleCells removeAllObjects];
 	free(_cellYOffsets);
 	
-	[_selectedRows removeAllIndexes];
+	//[_selectedRows removeAllIndexes];
 	
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
@@ -523,7 +525,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	_currentRange = visibleRange;
 }
 
-- (void)addNewVisibleCell:(PXListViewCell*)cell atRow:(NSUInteger)row
+-(void)	addNewVisibleCell: (PXListViewCell*)cell atRow: (NSUInteger)row
 {
 	[[self documentView] addSubview: cell];
 	[cell setListView: self];
@@ -533,7 +535,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
-- (BOOL)	attemptDragWithMouseDown: (NSEvent*)theEvent inCell: (PXListViewCell*)theCell
+-(BOOL)	attemptDragWithMouseDown: (NSEvent*)theEvent inCell: (PXListViewCell*)theCell
 {
 	PXIsDragStartResult	dragResult = PXIsDragStart( theEvent, 0.0 );
 	if( dragResult != PXIsDragStartMouseReleased /*&& (_verticalMotionCanBeginDrag || dragResult != PXIsDragStartMouseMovedVertically)*/ )	// Was a drag, not a click? Cool!
@@ -555,9 +557,10 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return NO;
 }
 
-- (void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
+-(void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
 	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
+	[[self window] makeFirstResponder: self];
 	
 	BOOL		tryDraggingAgain = YES;
 	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
@@ -610,6 +613,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 - (void)	handleMouseDownOutsideCells: (NSEvent*)theEvent
 {
 #pragma unused(theEvent)
+	[[self window] makeFirstResponder: self];
+
 	if( _allowsEmptySelection )
 		[self deselectRows];
 	else if( _numberOfRows > 1 )
@@ -643,13 +648,13 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return YES;
 }
 
-- (BOOL)becomeFirstResponder
+-(BOOL)	becomeFirstResponder
 {
 	return YES;
 }
 
 
-- (BOOL)resignFirstResponder
+-(BOOL)	resignFirstResponder
 {
 	return YES;
 }
