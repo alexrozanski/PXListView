@@ -23,7 +23,7 @@
 
 - (void)			updateCells;
 
-- (void)			enqueueCell: (PXListViewCell*)cell;
+-(void)				enqueueCell: (PXListViewCell*)cell viewController: (NSViewController*)viewController;
 
 - (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
 - (void)			handleMouseDownOutsideCells: (NSEvent*)theEvent;

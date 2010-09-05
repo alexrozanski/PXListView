@@ -22,7 +22,9 @@
 	id <PXListViewDelegate> _delegate;
 	
 	NSMutableArray		*_reusableCells;
+	NSMutableArray		*_reusableViewControllers;
 	NSMutableArray		*_visibleCells;
+	NSMutableArray		*_visibleViewControllers;
 	NSRange				_currentRange;
 	
 	NSUInteger			_numberOfRows;
@@ -53,7 +55,8 @@
 
 - (void)			reloadData;
 
-- (PXListViewCell*)	dequeueCellWithReusableIdentifier: (NSString*)identifier;
+- (PXListViewCell*)		dequeueCellWithReusableIdentifier: (NSString*)identifier;
+- (NSViewController*)	dequeueViewControllerWithReusableIdentifier: (NSString*)identifier;
 
 - (NSRange)			visibleRange;
 - (NSRect)			rectOfRow: (NSUInteger)row;

@@ -26,7 +26,7 @@
 #pragma mark -
 #pragma mark Init/Dealloc
 
-- (id)initWithReusableIdentifier:(NSString*)identifier
+-(id)	initWithReusableIdentifier: (NSString*)identifier
 {
 	if(( self = [super initWithFrame: NSZeroRect] ))
 	{
@@ -36,7 +36,19 @@
 	return self;
 }
 
-- (void)dealloc
+
+-(id)	initWithCoder: (NSCoder *)aDecoder
+{
+	if(( self = [super initWithCoder: aDecoder] ))
+	{
+		_reusableIdentifier = NSStringFromClass([self class]);
+	}
+	
+	return self;
+}
+
+
+-(void)	dealloc
 {
 	[_reusableIdentifier release];
 	[super dealloc];
@@ -45,12 +57,12 @@
 #pragma mark -
 #pragma mark Handling Selection
 
-- (void)mouseDown:(NSEvent *)theEvent
+-(void)	mouseDown: (NSEvent *)theEvent
 {
 	[[self listView] handleMouseDown: theEvent inCell: self];
 }
 
-- (BOOL)isSelected
+-(BOOL)	isSelected
 {
 	return [[[self listView] selectedRows] containsIndex: [self row]];
 }
@@ -58,7 +70,7 @@
 #pragma mark -
 #pragma mark Drag & Drop
 
-- (void)	setDropHighlight: (PXListViewDropHighlight)inState
+-(void)	setDropHighlight: (PXListViewDropHighlight)inState
 {
 	[[self listView] setShowsDropHighlight: inState != PXListViewDropNowhere];
 	
@@ -101,7 +113,7 @@
 #pragma mark -
 #pragma mark Reusing Cells
 
-- (void)prepareForReuse
+-(void)	prepareForReuse
 {
 	_dropHighlight = PXListViewDropNowhere;
 }
@@ -119,7 +131,7 @@
 	return attribs;
 }
 
-- (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute
+-(BOOL)	accessibilityIsAttributeSettable: (NSString *)attribute
 {
 	if( [attribute isEqualToString: NSAccessibilityRoleAttribute]
 		or [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
@@ -166,7 +178,7 @@
 }
 
 
-- (BOOL)accessibilityIsIgnored
+-(BOOL)	accessibilityIsIgnored
 {
 	return NO;
 }

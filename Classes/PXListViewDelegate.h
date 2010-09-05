@@ -16,8 +16,11 @@
 
 @required
 - (NSUInteger)		numberOfRowsInListView: (PXListView*)aListView;
-- (PXListViewCell*)	listView: (PXListView*)aListView cellForRow: (NSUInteger)row;
 - (CGFloat)			listView: (PXListView*)aListView heightOfRow: (NSUInteger)row;
+
+@optional	// You *must* implement ONE of the following two:
+-(NSViewController*)	listView: (PXListView*)aListView viewControllerForRow: (NSUInteger)row;
+-(PXListViewCell*)		listView: (PXListView*)aListView cellForRow: (NSUInteger)row;
 
 @optional
 - (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;
