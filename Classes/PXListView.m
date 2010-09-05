@@ -270,7 +270,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	[cell setHidden: YES];
 }
 
--(PXListViewCell*)	dequeueCellWithReusableIdentifier:(NSString*)identifier
+-(PXListViewCell*)	dequeueCellWithReusableIdentifier: (NSString*)identifier
 {
 	if( [_reusableCells count] == 0 )
 	{
@@ -298,7 +298,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
--(NSViewController*)	dequeueViewControllerWithReusableIdentifier:(NSString*)identifier
+-(NSViewController*)	dequeueViewControllerWithReusableIdentifier: (NSString*)identifier
 {
 	if( [_reusableViewControllers count] == 0 )
 	{
@@ -318,6 +318,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			[_reusableCells removeObjectAtIndex: i];
 			[_reusableViewControllers removeObjectAtIndex: i];
 			[cell prepareForReuse];
+			if( [viewController respondsToSelector: @selector(prepareForReuse)] )
+				[(id)viewController prepareForReuse];
 			
 			return viewController;
 		}
