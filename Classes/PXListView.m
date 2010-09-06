@@ -6,8 +6,6 @@
 //  Copyright 2010 Alex Rozanski. http://perspx.com. All rights reserved.
 //
 
-#pragma mark Headers
-
 #import "PXListView.h"
 #import "PXListView+Private.h"
 
@@ -15,9 +13,6 @@
 
 #import "PXListViewCell.h"
 #import "PXListViewCell+Private.h"
-
-
-#pragma mark Helpers
 
 // Apple sadly doesn't provide CGFloat variants of these:
 #if CGFLOAT_IS_DOUBLE
@@ -27,17 +22,6 @@
 #endif
 
 // This is a renamed copy of UKIsDragStart from <http://github.com/uliwitness/UliKit>:
-
-// Possible return values from UKIsDragStart:
-enum
-{
-	PXIsDragStartMouseReleased = 0,
-	PXIsDragStartTimedOut,
-	PXIsDragStartMouseMovedHorizontally,
-	PXIsDragStartMouseMovedVertically
-};
-typedef NSInteger PXIsDragStartResult;
-
 static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval theTimeout )
 {
 	if( theTimeout == 0.0 )
@@ -54,8 +38,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		pool = [[NSAutoreleasePool alloc] init];
 		
 		NSEvent*	currEvent = [NSApp nextEventMatchingMask: NSLeftMouseUpMask | NSRightMouseUpMask | NSOtherMouseUpMask
-															| NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask
-									untilDate: expireTime inMode: NSEventTrackingRunLoopMode dequeue: YES];
+								 | NSLeftMouseDraggedMask | NSRightMouseDraggedMask | NSOtherMouseDraggedMask
+												untilDate: expireTime inMode: NSEventTrackingRunLoopMode dequeue: YES];
 		if( currEvent )
 		{
 			switch( [currEvent type] )
@@ -68,14 +52,14 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 					return PXIsDragStartMouseReleased;	// Mouse released within the wait time.
 					break;
 				}
-				
+					
 				case NSLeftMouseDragged:
 				case NSRightMouseDragged:
 				case NSOtherMouseDragged:
 				{
 					NSPoint	newPos = [currEvent locationInWindow];
-					CGFloat	xMouseMovement = CGFLOATABS(newPos.x -startPos.x),
-							yMouseMovement = CGFLOATABS(newPos.y -startPos.y);
+					CGFloat	xMouseMovement = CGFLOATABS(newPos.x -startPos.x);
+					CGFloat	yMouseMovement = CGFLOATABS(newPos.y -startPos.y);
 					if( xMouseMovement > 2 or yMouseMovement > 2 )
 					{
 						[pool release];
@@ -92,11 +76,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return PXIsDragStartTimedOut;	// If they held the mouse that long, they probably wanna drag.
 }
 
-
-
-#pragma mark -
-
-
 @implementation PXListView
 
 @synthesize delegate = _delegate;
@@ -108,9 +87,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 #pragma mark -
 #pragma mark Init/Dealloc
 
--(id)	initWithFrame: (NSRect)theFrame
+- (id)initWithFrame:(NSRect)theFrame
 {
-	if(( self = [super initWithFrame: theFrame] ))
+	if((self = [super initWithFrame:theFrame]))
 	{
 		_reusableCells = [[NSMutableArray alloc] init];
 		_visibleCells = [[NSMutableArray alloc] init];
@@ -121,9 +100,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return self;
 }
 
--(id)	initWithCoder: (NSCoder*)decoder
+- (id)initWithCoder:(NSCoder*)decoder
 {
-	if(( self = [super initWithCoder:decoder] ))
+	if((self = [super initWithCoder:decoder]))
 	{
 		_reusableCells = [[NSMutableArray alloc] init];
 		_visibleCells = [[NSMutableArray alloc] init];
@@ -149,7 +128,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	[[self documentView] setListView: self];
 }
 
--(void)	dealloc
+- (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
@@ -174,8 +153,17 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	id <PXListViewDelegate> delegate = [self delegate];
 	
-	//Clean up cached resources
-	[_reusableCells removeAllObjects];
+	// Move all visible cells to the reusable cells array
+	NSUInteger numCells = [_visibleCells count];
+	for (NSUInteger i = 0; i < numCells; i++)
+	{
+		PXListViewCell *cell = [_visibleCells objectAtIndex:i];
+		[_reusableCells addObject:cell];
+		NSViewController *viewController = [_visibleViewControllers objectAtIndex:i];
+		[_reusableViewControllers addObject:viewController];
+		[cell setHidden:YES];
+	}
+	
 	[_visibleCells removeAllObjects];
 	free(_cellYOffsets);
 	
@@ -195,52 +183,56 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
-- (void)	setSelectedRow: (NSUInteger)row
+- (void)setSelectedRow:(NSUInteger)row
 {
-	[self selectRowIndexes: [NSIndexSet indexSetWithIndex: row] byExtendingSelection: NO];
+	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection: NO];
 }
 
 
--(NSUInteger)	selectedRow
+- (NSUInteger)selectedRow
 {
-	if( [_selectedRows count] == 1 )
+	if( [_selectedRows count] == 1 ) {
 		return [_selectedRows firstIndex];
-	else
-		return NSUIntegerMax;	// This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
+	}
+	else {
+		//This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
+		return NSUIntegerMax;
+	}
 }
 
 
--(void)	setSelectedRows: (NSIndexSet *)rows
+- (void)setSelectedRows:(NSIndexSet *)rowIndexes
 {
-	[self selectRowIndexes: rows byExtendingSelection: NO];
+	[self selectRowIndexes:rowIndexes byExtendingSelection:NO];
 }
 
 
--(NSIndexSet*)	selectedRows
+- (NSIndexSet*)selectedRows
 {
 	return _selectedRows;	// +++ Copy/autorelease?
 }
 
 
-- (void)selectRowIndexes: (NSIndexSet*)rows byExtendingSelection: (BOOL)doExtend
+- (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection:(BOOL)shouldExtend
 {
-	if( !doExtend )
+	if(!shouldExtend) {
 		[self deselectRowIndexes: _selectedRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
+	}
 	
-	[_selectedRows addIndexes: rows];	// _selectedRows is empty if !doExtend, because we just deselected all.
+	[_selectedRows addIndexes:rows];	// _selectedRows is empty if !doExtend, because we just deselected all.
 
-	NSArray*	newSelectedCells = [self visibleCellsForRowIndexes: rows];
-	for( PXListViewCell *newSelectedCell in newSelectedCells )
+	NSArray *newSelectedCells = [self visibleCellsForRowIndexes:rows];
+	for(PXListViewCell *newSelectedCell in newSelectedCells)
 	{
 		[newSelectedCell setNeedsDisplay: YES];
 	}
 }
 
 
--(void)	deselectRowIndexes: (NSIndexSet*)rows
+- (void)deselectRowIndexes:(NSIndexSet*)rows
 {
-	NSArray*	oldSelectedCells = [self visibleCellsForRowIndexes: rows];
-	[_selectedRows removeIndexes: rows];
+	NSArray *oldSelectedCells = [self visibleCellsForRowIndexes:rows];
+	[_selectedRows removeIndexes:rows];
 	
 	for( PXListViewCell *oldSelectedCell in oldSelectedCells )
 	{
@@ -249,13 +241,13 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
--(void)	deselectRows
+- (void)deselectRows
 {
 	[self deselectRowIndexes: _selectedRows];
 }
 
 
--(NSUInteger)		numberOfRows
+- (NSUInteger)numberOfRows
 {
 	return _numberOfRows;
 }
@@ -280,7 +272,10 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 	
 	// Search backwards looking for a match since removing from end of array is generally quicker:
-	for( NSUInteger i = [_reusableCells count] -1; i >= 0; i--)
+	// Tom: Somehow i was getting <0 here, because i>=0 is always true for unsigned integers. Temporarily made this an integer.
+	// Tom: This was only a bug for lists using multiple identifiers for its cells.
+	// Tom: NSInteger shouldn't be a problem here - nobody will have more than 2.1 billion active cells.
+	for(NSInteger i = [_reusableCells count]-1; i>=0;i--)
 	{
 		PXListViewCell *cell = [_reusableCells objectAtIndex: i];
 		
@@ -307,8 +302,11 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		return nil;
 	}
 	
-	// Search backwards looking for a match since removing from end of array is generally quicker:
-	for( NSUInteger i = [_reusableViewControllers count] -1; i >= 0; i--)
+	//Search backwards looking for a match since removing from end of array is generally quicker
+	// Tom: Somehow i was getting <0 here, because i>=0 is always true for unsigned integers. Temporarily made this an integer.
+	// Tom: This was only a bug for lists using multiple identifiers for its cells.
+	// Tom: NSInteger shouldn't be a problem here - nobody will have more than 2.1 billion active cells.
+	for(NSInteger i = [_reusableViewControllers count] -1; i >= 0; i--)
 	{
 		PXListViewCell		*cell = [_reusableCells objectAtIndex: i];
 		NSViewController	*viewController = [_reusableViewControllers objectAtIndex: i];
@@ -333,16 +331,16 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 -(NSRange) visibleRange
 {
-	NSRect		visibleRect = [[self contentView] documentVisibleRect];
-	NSUInteger	startRow = NSUIntegerMax;
-	NSUInteger	endRow = NSUIntegerMax;
+	NSRect visibleRect = [[self contentView] documentVisibleRect];
+	NSUInteger startRow = NSUIntegerMax;
+	NSUInteger endRow = NSUIntegerMax;
 	
 	BOOL inRange = NO;
-	for( NSUInteger i = 0; i < _numberOfRows; i++ )
+	for(NSUInteger i = 0; i < _numberOfRows; i++)
 	{
-		if( NSIntersectsRect([self rectOfRow:i], visibleRect) )
+		if(NSIntersectsRect([self rectOfRow:i], visibleRect))
 		{
-			if( startRow == NSUIntegerMax )
+			if(startRow == NSUIntegerMax)
 			{
 				startRow = i;
 				inRange = YES;
@@ -358,7 +356,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		}
 	}
 	
-	if( endRow == NSUIntegerMax )
+	if(endRow == NSUIntegerMax)
 	{
 		endRow = _numberOfRows; 
 	}
@@ -366,13 +364,13 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return NSMakeRange(startRow, endRow-startRow);
 }
 
--(PXListViewCell*)	visibleCellForRow: (NSUInteger)row
+- (PXListViewCell*)visibleCellForRow:(NSUInteger)row
 {
 	PXListViewCell *outCell = nil;
 	
-	for( PXListViewCell* cell in _visibleCells )
+	for(PXListViewCell* cell in _visibleCells)
 	{
-		if( [cell row] == row )
+		if([cell row] == row)
 		{
 			outCell = cell;
 			break;
@@ -382,13 +380,13 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return outCell;
 }
 
--(NSArray*)	visibleCellsForRowIndexes: (NSIndexSet*)rows
+- (NSArray*)visibleCellsForRowIndexes:(NSIndexSet*)rows
 {
-	NSMutableArray		*theCells = [NSMutableArray array];
+	NSMutableArray * theCells = [NSMutableArray array];
 	
-	for( PXListViewCell* cell in _visibleCells )
+	for(PXListViewCell* cell in _visibleCells)
 	{
-		if( [rows containsIndex: [cell row]] )
+		if([rows containsIndex:[cell row]])
 		{
 			[theCells addObject: cell];
 		}
@@ -405,7 +403,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	{
 		NSRange visibleRange = [self visibleRange];
 		
-		for( NSUInteger i = visibleRange.location; i < NSMaxRange(visibleRange); i++ )
+		for(NSUInteger i = visibleRange.location; i < NSMaxRange(visibleRange); i++)
 		{
 			id					cell = nil;
 			NSViewController*	viewController = nil;
@@ -427,23 +425,22 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 }
 
-- (void)	updateCells
+- (void)updateCells
 {	
-	if(_inLiveResize)
-	{
+	//Resizing all the cells in live resize is computationally pretty expensive; however make this a property?
+	if(_inLiveResize) {
 		return;
 	}
 	
 	NSRange visibleRange = [self visibleRange];
 	NSRange intersectionRange = NSIntersectionRange(visibleRange, _currentRange);
 	
-	if( visibleRange.location == _currentRange.location
-		and NSMaxRange(visibleRange) == NSMaxRange(_currentRange) )
-	{
+	//Have the cells we need to display actually changed?
+	if((visibleRange.location == _currentRange.location) && (NSMaxRange(visibleRange) == NSMaxRange(_currentRange))) {
 		return;
 	}
 	
-	if( intersectionRange.location == 0 and intersectionRange.length == 0 )
+	if((intersectionRange.location == 0) && (intersectionRange.length == 0))
 	{
 		// We'll have to rebuild all the cells:
 		[_reusableCells addObjectsFromArray: _visibleCells];
@@ -636,14 +633,13 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 #pragma mark -
 #pragma mark Keyboard Handling
 
-
--(BOOL)	canBecomeKeyView
+- (BOOL)canBecomeKeyView
 {
 	return YES;
 }
 
 
--(BOOL)	acceptsFirstResponder
+- (BOOL)acceptsFirstResponder
 {
 	return YES;
 }
@@ -660,7 +656,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
--(void)	keyDown:(NSEvent *)theEvent
+- (void)keyDown:(NSEvent *)theEvent
 {
 	[self interpretKeyEvents: [NSArray arrayWithObjects: theEvent, nil]];
 }
@@ -768,7 +764,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	id <PXListViewDelegate> delegate = [self delegate];
 	
-	if( [delegate conformsToProtocol:@protocol(PXListViewDelegate)] )
+	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
 		CGFloat totalHeight = 0;
 		
@@ -788,7 +784,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		NSRect bounds = [self bounds];
 		CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight: (NSHeight(bounds) -2);
 		
-		[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self bounds]), documentHeight)];
+		[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self contentViewRect]), documentHeight)];
 	}
 }
 
@@ -845,11 +841,11 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 -(void)	scrollRowToVisible: (NSUInteger)row
 {
-	if( row >= _numberOfRows )
+	if(row >= _numberOfRows)
 		return;
 	
-	NSRect		rowRect = [self rectOfRow: row];
-	NSPoint		newScrollPoint = [[self contentView] constrainScrollPoint: rowRect.origin];
+	NSRect rowRect = [self rectOfRow: row];
+	NSPoint	newScrollPoint = [[self contentView] constrainScrollPoint:rowRect.origin];
 	
 	// +++ Use minimal scroll necessary. Right now it forces the selection to upper left of window.
 	

@@ -31,23 +31,18 @@ When responding to `-listView:cellForRow:`, the delegate should first call `-deq
 
 You should create a concrete subclass of `PXListViewCell` when using it in the list view, where `drawRect:` can be overridden to do custom drawing, and properties used to store data for the cell can be declared on this subclass. The example project (as part of the repository) shows this.
 
-
-Backwards compatibility
------------------------
-
-If you've previously used PXListView, this class should work as a drop-in replacement for the original class with one IMPORTANT exception: -listView:heightOfRow: has been changed to return the more sensible type CGFloat instead of its previous NSInteger return type. Be sure to change your delegates, or your cells will have surprising heights.
-
-
 Attributions
 ------------
 
-This version of PXListView has been modified by [Uli Kusterer][5]. Don't blame the original author for any issues you may have with this code.
-
 Thanks to [Mike Abdullah][4] for optimizations related to cell dequeuing.
 
+Thanks to [Uli Kusterer][5] for additions and fixes to PXListView including momentum scrolling, keyboard navigation, changes to variable row heights (using CGFloats), accessibility as well as drag and drop support.
+
+Thanks to [Tom][6] for fixing a memory issue with reloading data. 
 
   [1]: http://perspx.com/blog/archives/1427/making-list-views-really-fast/
   [2]: http://www.atebits.com/tweetie-mac/
   [3]: http://www.echofon.com/twitter/mac/
   [4]: http://mikeabdullah.net/
   [5]: http://github.com/uliwitness
+  [6]: http://github.com/TvdW
