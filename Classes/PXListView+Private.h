@@ -6,6 +6,17 @@
 //  Copyright 2010 Alex Rozanski. http://perspx.com. All rights reserved.
 //
 
+// This is a renamed copy of UKIsDragStart from <http://github.com/uliwitness/UliKit>:
+// Possible return values from UKIsDragStart:
+enum
+{
+	PXIsDragStartMouseReleased = 0,
+	PXIsDragStartTimedOut,
+	PXIsDragStartMouseMovedHorizontally,
+	PXIsDragStartMouseMovedVertically
+};
+typedef NSInteger PXIsDragStartResult;
+
 @interface PXListView ()
 
 - (NSRect)			contentViewRect;
@@ -19,17 +30,15 @@
 - (PXListViewCell*)	visibleCellForRow: (NSUInteger)row;
 - (NSArray*)		visibleCellsForRowIndexes: (NSIndexSet*)rows;
 
+- (NSUInteger)		numberOfRows;
 - (void)			deselectRowIndexes: (NSIndexSet*)rows;
 
 - (void)			updateCells;
-
--(void)				enqueueCell: (PXListViewCell*)cell viewController: (NSViewController*)viewController;
+- (void)			enqueueCell: (PXListViewCell*)cell viewController: (NSViewController*)viewController;
 
 - (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
 - (void)			handleMouseDownOutsideCells: (NSEvent*)theEvent;
 
 - (void)			contentViewBoundsDidChange: (NSNotification *)notification;
-
--(NSUInteger)		numberOfRows;
 
 @end
