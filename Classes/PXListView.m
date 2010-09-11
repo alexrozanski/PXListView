@@ -848,10 +848,16 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	if( row >= _numberOfRows )
 		return;
 	
+	// Use minimal scroll necessary, so we don't force the selection to upper left of window:
+	NSRect		visRect = [self documentVisibleRect];
 	NSRect		rowRect = [self rectOfRow: row];
-	NSPoint		newScrollPoint = [[self contentView] constrainScrollPoint: rowRect.origin];
+	if( NSContainsRect(visRect, rowRect) )	// Already visible, no need to scroll.
+		return;
 	
-	// +++ Use minimal scroll necessary. Right now it forces the selection to upper left of window.
+	NSPoint		newScrollPoint = rowRect.origin;
+	if( NSMaxY(rowRect) > NSMaxY(visRect) )	// Have to scroll it so it's last visible row.
+		newScrollPoint.y -= (visRect.size.height -rowRect.size.height);
+	newScrollPoint = [[self contentView] constrainScrollPoint: newScrollPoint];
 	
 	[[self contentView] scrollToPoint: newScrollPoint];
 	[self reflectScrolledClipView: [self contentView]];
