@@ -17,28 +17,28 @@ enum
 };
 typedef NSInteger PXIsDragStartResult;
 
+
 @interface PXListView ()
 
-- (NSRect)			contentViewRect;
+- (NSRect)contentViewRect;
 
-- (void)			cacheCellLayout;
-- (void)			layoutCells;
-- (void)			layoutCell: (PXListViewCell*)cell;
+- (void)cacheCellLayout;
+- (void)layoutCells;
+- (void)layoutCell:(PXListViewCell*)cell atRow:(NSUInteger)row;
 
-- (void)			addCellsFromVisibleRange;
-- (void)			addNewVisibleCell: (PXListViewCell*)cell atRow: (NSUInteger)row;
-- (PXListViewCell*)	visibleCellForRow: (NSUInteger)row;
-- (NSArray*)		visibleCellsForRowIndexes: (NSIndexSet*)rows;
+- (void)addCellsFromVisibleRange;
+- (PXListViewCell*)visibleCellForRow:(NSUInteger)row;
+- (NSArray*)visibleCellsForRowIndexes:(NSIndexSet*)rows;
 
-- (NSUInteger)		numberOfRows;
-- (void)			deselectRowIndexes: (NSIndexSet*)rows;
+- (NSUInteger)numberOfRows;
+- (void)deselectRowIndexes:(NSIndexSet*)rows;
 
-- (void)			updateCells;
-- (void)			enqueueCell: (PXListViewCell*)cell viewController: (NSViewController*)viewController;
+- (void)updateCells;
+- (void)enqueueCell:(PXListViewCell*)cell;
 
-- (void)			handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell;
-- (void)			handleMouseDownOutsideCells: (NSEvent*)theEvent;
+- (void)handleMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell;
+- (void)handleMouseDownOutsideCells:(NSEvent*)theEvent;
 
-- (void)			contentViewBoundsDidChange: (NSNotification *)notification;
+- (void)contentViewBoundsDidChange:(NSNotification*)notification;
 
 @end

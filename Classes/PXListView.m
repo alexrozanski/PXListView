@@ -113,9 +113,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return self;
 }
 
--(void)	awakeFromNib
+- (void)awakeFromNib
 {
-	// Subscribe to scrolling notification:
+	//Subscribe to scrolling notification:
 	NSClipView *contentView = [self contentView];
 	[contentView setPostsBoundsChangedNotifications: YES];
 	
@@ -124,7 +124,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 												 name:NSViewBoundsDidChangeNotification
 											   object:contentView];
 	
-	// Tag ourselves onto the document view:
+	//Tag ourselves onto the document view:
 	[[self documentView] setListView: self];
 }
 
@@ -132,16 +132,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
-	[_reusableCells release];
-	_reusableCells = nil;
-	[_reusableViewControllers release];
-	_reusableViewControllers = nil;
-	[_visibleCells release];
-	_visibleCells = nil;
-	[_visibleViewControllers release];
-	_visibleViewControllers = nil;
-	[_selectedRows release];
-	_selectedRows = nil;
+	[_reusableCells release], _reusableCells = nil;
+	[_visibleCells release], _visibleCells = nil;
+	[_selectedRows release], _selectedRows = nil;
 	
 	[super dealloc];
 }
@@ -159,8 +152,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	{
 		PXListViewCell *cell = [_visibleCells objectAtIndex:i];
 		[_reusableCells addObject:cell];
-		NSViewController *viewController = [_visibleViewControllers objectAtIndex:i];
-		[_reusableViewControllers addObject:viewController];
 		[cell setHidden:YES];
 	}
 	
@@ -255,36 +246,30 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 #pragma mark -
 #pragma mark Cell Handling
 
--(void)	enqueueCell: (PXListViewCell*)cell viewController: (NSViewController*)viewController
+-(void)enqueueCell:(PXListViewCell*)cell
 {
-	[_reusableCells addObject: cell];
-	[_reusableViewControllers addObject: viewController];
-	[_visibleCells removeObject: cell];
-	[_visibleViewControllers removeObject: viewController];
-	[cell setHidden: YES];
+	[_reusableCells addObject:cell];
+	[_visibleCells removeObject:cell];
+	[cell setHidden:YES];
 }
 
--(PXListViewCell*)	dequeueCellWithReusableIdentifier: (NSString*)identifier
+- (PXListViewCell*)dequeueCellWithReusableIdentifier: (NSString*)identifier
 {
-	if( [_reusableCells count] == 0 )
+	if([_reusableCells count] == 0)
 	{
 		return nil;
 	}
 	
-	// Search backwards looking for a match since removing from end of array is generally quicker:
-	// Tom: Somehow i was getting <0 here, because i>=0 is always true for unsigned integers. Temporarily made this an integer.
-	// Tom: This was only a bug for lists using multiple identifiers for its cells.
-	// Tom: NSInteger shouldn't be a problem here - nobody will have more than 2.1 billion active cells.
-	for(NSInteger i = [_reusableCells count]-1; i>=0;i--)
+	//Search backwards looking for a match since removing from end of array is generally quicker
+	for(NSUInteger i = [_reusableCells count]; i>0;i--)
 	{
-		PXListViewCell *cell = [_reusableCells objectAtIndex: i];
+		PXListViewCell *cell = [_reusableCells objectAtIndex:(i-1)];
 		
-		if( [[cell reusableIdentifier] isEqualToString: identifier] )
+		if([[cell reusableIdentifier] isEqualToString:identifier])
 		{
-			// Make sure it doesn't get dealloc'd early:
+			//Make sure it doesn't get dealloc'd early:
 			[[cell retain] autorelease];            
-			[_reusableCells removeObjectAtIndex: i];
-			[_reusableViewControllers removeObjectAtIndex: i];
+			[_reusableCells removeObjectAtIndex:(i-1)];
 			[cell prepareForReuse];
 			
 			return cell;
@@ -294,42 +279,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return nil;
 }
 
-
--(NSViewController*)	dequeueViewControllerWithReusableIdentifier: (NSString*)identifier
-{
-	if( [_reusableViewControllers count] == 0 )
-	{
-		return nil;
-	}
-	
-	//Search backwards looking for a match since removing from end of array is generally quicker
-	// Tom: Somehow i was getting <0 here, because i>=0 is always true for unsigned integers. Temporarily made this an integer.
-	// Tom: This was only a bug for lists using multiple identifiers for its cells.
-	// Tom: NSInteger shouldn't be a problem here - nobody will have more than 2.1 billion active cells.
-	for(NSInteger i = [_reusableViewControllers count] -1; i >= 0; i--)
-	{
-		PXListViewCell		*cell = [_reusableCells objectAtIndex: i];
-		NSViewController	*viewController = [_reusableViewControllers objectAtIndex: i];
-		
-		if( [[cell reusableIdentifier] isEqualToString: identifier] )
-		{
-			// Make sure it doesn't get dealloc'd early:
-			[[viewController retain] autorelease];            
-			[_reusableCells removeObjectAtIndex: i];
-			[_reusableViewControllers removeObjectAtIndex: i];
-			[cell prepareForReuse];
-			if( [viewController respondsToSelector: @selector(prepareForReuse)] )
-				[(id)viewController prepareForReuse];
-			
-			return viewController;
-		}
-	}
-	
-	return nil;
-}
-
-
--(NSRange) visibleRange
+- (NSRange)visibleRange
 {
 	NSRect visibleRect = [[self contentView] documentVisibleRect];
 	NSUInteger startRow = NSUIntegerMax;
@@ -368,7 +318,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 {
 	PXListViewCell *outCell = nil;
 	
-	for(PXListViewCell* cell in _visibleCells)
+	for(PXListViewCell *cell in _visibleCells)
 	{
 		if([cell row] == row)
 		{
@@ -382,45 +332,34 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (NSArray*)visibleCellsForRowIndexes:(NSIndexSet*)rows
 {
-	NSMutableArray * theCells = [NSMutableArray array];
+	NSMutableArray *theCells = [NSMutableArray array];
 	
-	for(PXListViewCell* cell in _visibleCells)
+	for(PXListViewCell *cell in _visibleCells)
 	{
 		if([rows containsIndex:[cell row]])
 		{
-			[theCells addObject: cell];
+			[theCells addObject:cell];
 		}
 	}
 	
 	return theCells;
 }
 
--(void)	addCellsFromVisibleRange
+- (void)addCellsFromVisibleRange
 {
 	id<PXListViewDelegate>	delegate = [self delegate];
 	
-	if( [delegate conformsToProtocol: @protocol(PXListViewDelegate)] )
+	if([delegate conformsToProtocol: @protocol(PXListViewDelegate)])
 	{
 		NSRange visibleRange = [self visibleRange];
 		
 		for(NSUInteger i = visibleRange.location; i < NSMaxRange(visibleRange); i++)
 		{
-			id					cell = nil;
-			NSViewController*	viewController = nil;
-			if( [delegate respondsToSelector: @selector(listView:viewControllerForRow:)] )
-			{
-				viewController = [delegate listView: self viewControllerForRow: i];
-				cell = [viewController view];
-			}
-			else
-			{
-				cell = [delegate listView: self cellForRow: i];
-				viewController = (NSViewController*)[NSNull null];
-			}
-			[_visibleCells addObject: cell];
-			[_visibleViewControllers addObject: cell];
+			id cell = nil;
+            cell = [delegate listView: self cellForRow: i];
+			[_visibleCells addObject:cell];
 			
-			[self addNewVisibleCell: cell atRow: i];
+			[self layoutCell:cell atRow:i];
 		}
 	}
 }
@@ -443,92 +382,55 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	if((intersectionRange.location == 0) && (intersectionRange.length == 0))
 	{
 		// We'll have to rebuild all the cells:
-		[_reusableCells addObjectsFromArray: _visibleCells];
-		[_reusableViewControllers addObjectsFromArray: _visibleViewControllers];
+		[_reusableCells addObjectsFromArray:_visibleCells];
 		[_visibleCells removeAllObjects];
-		[_visibleViewControllers removeAllObjects];
-		[[self documentView] setSubviews: [NSArray array]];
+		[[self documentView] setSubviews:[NSArray array]];
 		[self addCellsFromVisibleRange];
 	}
 	else
 	{
-		if( visibleRange.location < _currentRange.location ) // Add top. 
+		if(visibleRange.location < _currentRange.location) // Add top. 
 		{
 			for( NSUInteger i = _currentRange.location; i > visibleRange.location; i-- )
 			{
-				NSUInteger			newRow = i -1;
-				PXListViewCell		*cell = nil;
-				NSViewController	*viewController = nil;
-				if( [[self delegate] respondsToSelector: @selector(listView:viewControllerForRow:)] )
-				{
-					viewController = [[self delegate] listView: self viewControllerForRow: newRow];
-					cell = (PXListViewCell*)[viewController view];
-				}
-				else
-					cell = [[self delegate] listView: self cellForRow: newRow];
-				[_visibleCells insertObject: cell atIndex: 0];
-				[_visibleViewControllers insertObject: viewController ? viewController : (NSViewController*)[NSNull null] atIndex: 0];
-				[self addNewVisibleCell: cell atRow: newRow];
+				NSUInteger newRow = i -1;
+				PXListViewCell *cell = [[self delegate] listView:self cellForRow:newRow];
+                
+				[_visibleCells insertObject: cell atIndex:0];
+				[self layoutCell:cell atRow:newRow];
 			}
 		}
-		else if( visibleRange.location > _currentRange.location ) // Remove top.
+        
+		if(visibleRange.location > _currentRange.location) // Remove top.
 		{
-			for( NSUInteger i = visibleRange.location; i > _currentRange.location; i-- )
+			for(NSUInteger i = visibleRange.location; i > _currentRange.location; i--)
 			{
-				PXListViewCell		*firstCell = [_visibleCells objectAtIndex: 0];
-				NSViewController	*firstController = [_visibleViewControllers objectAtIndex: 0];
-				if( !firstController )
-					firstController = (NSViewController*)[NSNull null];
-				[self enqueueCell: firstCell viewController: firstController];
+				[self enqueueCell:[_visibleCells objectAtIndex:0]];
 			}
 		}
 		
-		if( NSMaxRange(visibleRange) > NSMaxRange(_currentRange) ) // Add bottom.
+		if(NSMaxRange(visibleRange) > NSMaxRange(_currentRange)) // Add bottom.
 		{
-			for( NSUInteger i = NSMaxRange(_currentRange); i < NSMaxRange(visibleRange); i++ )
+			for(NSUInteger i = NSMaxRange(_currentRange); i < NSMaxRange(visibleRange); i++)
 			{
-				NSInteger			newRow = i;
-				PXListViewCell		*cell = nil;
-				NSViewController	*viewController = nil;
-				if( [[self delegate] respondsToSelector: @selector(listView:viewControllerForRow:)] )
-				{
-					viewController = [[self delegate] listView: self viewControllerForRow: newRow];
-					cell = (PXListViewCell*)[viewController view];
-				}
-				else
-					cell = [[self delegate] listView: self cellForRow: newRow];
-				[_visibleCells addObject: cell];
-				[_visibleViewControllers addObject: (viewController ? viewController : (NSViewController*)[NSNull null])];
-				[self addNewVisibleCell: cell atRow: newRow];
+				NSInteger newRow = i;
+				PXListViewCell *cell = [[self delegate] listView:self cellForRow: newRow];
+                
+				[_visibleCells addObject:cell];
+				[self layoutCell:cell atRow:newRow];
 			}
 		}
-		else if( NSMaxRange(visibleRange) < NSMaxRange(_currentRange) ) // Remove bottom.
+		
+        if(NSMaxRange(visibleRange) < NSMaxRange(_currentRange)) // Remove bottom.
 		{
-			for( NSUInteger i = NSMaxRange(_currentRange); i > NSMaxRange(visibleRange); i-- )
+			for(NSUInteger i = NSMaxRange(_currentRange); i > NSMaxRange(visibleRange); i--)
 			{
-				PXListViewCell		*lastCell = [_visibleCells lastObject];
-				NSViewController	*lastController = [_visibleViewControllers lastObject];
-				if( !lastController )
-					lastController = (NSViewController*)[NSNull null];
-				[self enqueueCell: lastCell viewController: lastController];
+				[self enqueueCell:[_visibleCells lastObject]];
 			}
 		}
 	}
 	
-	#if DEBUG
-	PXLog(@"No of cells in view hierarchy: %d", [_visibleCells count]);
-	#endif
-	
 	_currentRange = visibleRange;
-}
-
--(void)	addNewVisibleCell: (PXListViewCell*)cell atRow: (NSUInteger)row
-{
-	[[self documentView] addSubview: cell];
-	[cell setListView: self];
-	[cell setRow: row];
-	[self layoutCell: cell];
-	[cell setHidden: NO];
 }
 
 
@@ -798,16 +700,20 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 	
 	NSRect bounds = [self bounds];
-	CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight: (NSHeight(bounds) -2);
+	CGFloat documentHeight = _totalHeight>NSHeight(bounds)?_totalHeight:(NSHeight(bounds) -2);
 	
 	//Set the new height of the document view
 	[[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self contentViewRect]), documentHeight)];
 }
 
-- (void)layoutCell:(PXListViewCell*)cell
+- (void)layoutCell:(PXListViewCell*)cell atRow:(NSUInteger)row
 {
-	NSInteger row = [cell row];
-	[cell setFrame:[self rectOfRow:row]];
+	[[self documentView] addSubview:cell];
+    [cell setFrame:[self rectOfRow:row]];
+    
+	[cell setListView:self];
+	[cell setRow:row];
+	[cell setHidden:NO];
 }
 
 - (void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize
@@ -819,8 +725,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	if(!_inLiveResize)
 	{
 		[_visibleCells removeAllObjects];
-		[_visibleViewControllers removeAllObjects];
-		[[self documentView] setSubviews: [NSArray array]];
+		[[self documentView] setSubviews:[NSArray array]];
 		
 		[self cacheCellLayout];
 		[self addCellsFromVisibleRange];
@@ -1189,7 +1094,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	
 	// Change the layout of the cells:
 	[_visibleCells removeAllObjects];
-	[_visibleViewControllers removeAllObjects];
 	[[self documentView] setSubviews:[NSArray array]];
 	
 	[self cacheCellLayout];
