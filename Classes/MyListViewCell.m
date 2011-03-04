@@ -47,15 +47,14 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-	// Draw the border and background:
-	if([self isSelected])
-	{
+	if([self isSelected]) {
 		[[NSColor selectedControlColor] set];
 	}
 	else {
 		[[NSColor whiteColor] set];
     }
 
+    //Draw the border and background
 	NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect:[self bounds] xRadius:6.0 yRadius:6.0];
 	[roundedRect fill];
 }
@@ -64,7 +63,7 @@
 #pragma mark -
 #pragma mark Accessibility
 
--(NSArray*)	accessibilityAttributeNames
+- (NSArray*)accessibilityAttributeNames
 {
 	NSMutableArray*	attribs = [[[super accessibilityAttributeNames] mutableCopy] autorelease];
 	
@@ -89,23 +88,25 @@
 		return [super accessibilityIsAttributeSettable: attribute];
 }
 
--(id)	accessibilityAttributeValue: (NSString *)attribute
+- (id)accessibilityAttributeValue:(NSString*)attribute
 {
-	if( [attribute isEqualToString: NSAccessibilityRoleAttribute] )
+	if([attribute isEqualToString:NSAccessibilityRoleAttribute])
 	{
 		return NSAccessibilityButtonRole;
 	}
-	else if( [attribute isEqualToString: NSAccessibilityDescriptionAttribute]
-			or [attribute isEqualToString: NSAccessibilityTitleAttribute] )
+	
+    if([attribute isEqualToString:NSAccessibilityDescriptionAttribute]
+			or [attribute isEqualToString:NSAccessibilityTitleAttribute])
 	{
 		return [titleLabel stringValue];
 	}
-	else if( [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
+    
+	if([attribute isEqualToString:NSAccessibilityEnabledAttribute])
 	{
-		return [NSNumber numberWithBool: YES];
+		return [NSNumber numberWithBool:YES];
 	}
-	else
-		return [super accessibilityAttributeValue: attribute];
+
+    return [super accessibilityAttributeValue:attribute];
 }
 
 @end
