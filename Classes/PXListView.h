@@ -32,7 +32,9 @@
 	BOOL _allowsEmptySelection;
 	BOOL _allowsMultipleSelection;
 	BOOL _verticalMotionCanBeginDrag;
+    
     BOOL _usesLiveResize;
+    CGFloat _widthPriorToResize;
 	
 	NSUInteger _dropRow;
 	PXListViewDropHighlight	_dropHighlight;

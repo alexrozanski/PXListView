@@ -651,10 +651,14 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
-		NSRect contentViewRect = [self contentViewRect];
+        CGFloat cellWidth = NSWidth([self contentViewRect]);
+        if([self inLiveResize]&&![self usesLiveResize]) {
+            cellWidth = _widthPriorToResize;
+        }
+
 		CGFloat rowHeight = [delegate listView:self heightOfRow:row];
 		
-		return NSMakeRect(0.0f, _cellYOffsets[row], NSWidth(contentViewRect), rowHeight);
+		return NSMakeRect(0.0f, _cellYOffsets[row], cellWidth, rowHeight);
 	}
 	
 	return NSZeroRect;
@@ -730,6 +734,9 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		
 		_currentRange = [self visibleRange];
 	}
+    else if([self inLiveResize]&&![self usesLiveResize]) {
+        [self updateCells];
+    }
 }
 
 #pragma mark -
@@ -1080,6 +1087,11 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 #pragma mark -
 #pragma mark Sizing
+
+- (void)viewWillStartLiveResize
+{
+    _widthPriorToResize = NSWidth([self contentViewRect]);
+}
 
 - (void)viewDidEndLiveResize
 {
