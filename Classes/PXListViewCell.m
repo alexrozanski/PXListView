@@ -23,12 +23,33 @@
 @synthesize row = _row;
 @synthesize dropHighlight = _dropHighlight;
 
++ (id)cellLoadedFromNibNamed:(NSString*)nibName reusableIdentifier:(NSString*)identifier
+{
+    NSNib *cellNib = [[NSNib alloc] initWithNibNamed:nibName bundle:nil];
+    NSArray *objects = nil;
+    
+    id cell = nil;
+    
+    [cellNib instantiateNibWithOwner:nil topLevelObjects:&objects];
+    for(id object in objects) {
+        if([object isKindOfClass:[self class]]) {
+            cell = object;
+            [cell setReusableIdentifier:identifier];
+            break;
+        }
+    }
+    
+    [cellNib release];
+    
+    return cell;
+}
+
 #pragma mark -
 #pragma mark Init/Dealloc
 
--(id)	initWithReusableIdentifier: (NSString*)identifier
+- (id)initWithReusableIdentifier:(NSString*)identifier
 {
-	if(( self = [super initWithFrame: NSZeroRect] ))
+	if((self = [super initWithFrame: NSZeroRect]))
 	{
 		_reusableIdentifier = [identifier copy];
 	}
@@ -37,9 +58,9 @@
 }
 
 
--(id)	initWithCoder: (NSCoder *)aDecoder
+- (id)initWithCoder: (NSCoder *)aDecoder
 {
-	if(( self = [super initWithCoder: aDecoder] ))
+	if((self = [super initWithCoder: aDecoder]))
 	{
 		_reusableIdentifier = NSStringFromClass([self class]);
 	}
@@ -48,7 +69,7 @@
 }
 
 
--(void)	dealloc
+- (void)dealloc
 {
 	[_reusableIdentifier release];
 	[super dealloc];
@@ -57,14 +78,14 @@
 #pragma mark -
 #pragma mark Handling Selection
 
--(void)	mouseDown: (NSEvent *)theEvent
+- (void)mouseDown:(NSEvent*)theEvent
 {
-	[[self listView] handleMouseDown: theEvent inCell: self];
+	[[self listView] handleMouseDown:theEvent inCell:self];
 }
 
--(BOOL)	isSelected
+- (BOOL)isSelected
 {
-	return [[[self listView] selectedRows] containsIndex: [self row]];
+	return [[[self listView] selectedRows] containsIndex:[self row]];
 }
 
 #pragma mark -
@@ -113,7 +134,7 @@
 #pragma mark -
 #pragma mark Reusing Cells
 
--(void)	prepareForReuse
+- (void)prepareForReuse
 {
 	_dropHighlight = PXListViewDropNowhere;
 }

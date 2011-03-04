@@ -8,6 +8,7 @@
 
 @interface PXListViewCell ()
 
-@property (readwrite) NSUInteger row;
+@property (readwrite, copy) NSString *reusableIdentifier;
+@property (readwrite, assign) NSUInteger row;
 
 @end
