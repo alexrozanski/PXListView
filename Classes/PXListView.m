@@ -161,7 +161,8 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	[_visibleCells removeAllObjects];
 	free(_cellYOffsets);
 	
-	//[_selectedRows removeAllIndexes];
+	[_selectedRows removeAllIndexes];
+    _lastSelectedRow = -1;
 	
 	if([delegate conformsToProtocol:@protocol(PXListViewDelegate)])
 	{
@@ -454,63 +455,57 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return NO;
 }
 
--(void)	handleMouseDown: (NSEvent*)theEvent	inCell: (PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
+- (void)handleMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell
 {
-	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
-	[[self window] makeFirstResponder: self];
+	//theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
+	[[self window] makeFirstResponder:self];
 	
-	BOOL		tryDraggingAgain = YES;
-	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
-	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
-	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
-	
-	// If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
-	if( theEvent and isSelected and [self attemptDragWithMouseDown: theEvent inCell: theCell] )
+    BOOL shiftKeyPressed = ([theEvent modifierFlags] & NSShiftKeyMask)!=0;
+    BOOL cmdKeyPressed = ([theEvent modifierFlags] & NSCommandKeyMask)!=0;
+    
+	BOOL isCellSelected = [_selectedRows containsIndex:[theCell row]];
+
+    NSMutableIndexSet *newSelectedIndexes = [[_selectedRows mutableCopy] autorelease];    
+    NSInteger row = [theCell row];
+    
+    //Shared behaviour between multiple/single selection
+    if(!shiftKeyPressed&&!cmdKeyPressed) {
+        _lastSelectedRow = row;
+        
+        if(isCellSelected&&[self allowsEmptySelection]) {
+            if([_selectedRows count]==1) {
+                [newSelectedIndexes removeAllIndexes];
+            }
+            else {
+                [newSelectedIndexes removeAllIndexes];
+                [newSelectedIndexes addIndex:row];
+            }
+        }
+        else {
+            [newSelectedIndexes removeAllIndexes];
+            [newSelectedIndexes addIndex:row];
+        }
+    }
+    
+    //Behaviour for multiple selection
+    if([self allowsMultipleSelection]) {
+        
+    }
+    
+	//If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
+	/*if(theEvent && isSelected && [self attemptDragWithMouseDown:theEvent inCell:theCell])
 		return;
-	
-	if( _allowsMultipleSelection )
-	{
-		if( isSelected && shouldToggle )
-		{
-			if( [_selectedRows count] == 1 && !_allowsEmptySelection )
-				return;
-			[self deselectRowIndexes: clickedIndexSet];
-		}
-		else if( !isSelected && shouldToggle )
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
-		else if( !isSelected && !shouldToggle )
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-		else if( isSelected && !shouldToggle && [_selectedRows count] != 1 )
-		{
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-			tryDraggingAgain = NO;
-		}
-	}
-	else if( shouldToggle && _allowsEmptySelection )
-	{
-		if( isSelected )
-		{
-			[self deselectRowIndexes: clickedIndexSet];
-			tryDraggingAgain = NO;
-		}
-		else
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-	}
-	else
-	{
-		[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-	}
-	
-	// If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
-	if( tryDraggingAgain && theEvent and [_selectedRows containsIndex: [theCell row]] )
-		[self attemptDragWithMouseDown: theEvent inCell: theCell];
+	*/
+    
+    if(newSelectedIndexes) {
+        [self setSelectedRows:newSelectedIndexes];
+    }
 }
 
 
-- (void)	handleMouseDownOutsideCells: (NSEvent*)theEvent
+- (void)handleMouseDownOutsideCells:(NSEvent*)theEvent
 {
-#pragma unused(theEvent)
-	[[self window] makeFirstResponder: self];
+	[[self window] makeFirstResponder:self];
 
 	if( _allowsEmptySelection )
 		[self deselectRows];
@@ -531,7 +526,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 #pragma mark -
-#pragma mark Keyboard Handling
+#pragma mark NSResponder
 
 - (BOOL)canBecomeKeyView
 {
@@ -544,90 +539,83 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return YES;
 }
 
--(BOOL)	becomeFirstResponder
+- (BOOL)becomeFirstResponder
 {
 	return YES;
 }
 
 
--(BOOL)	resignFirstResponder
+- (BOOL)resignFirstResponder
 {
 	return YES;
 }
 
+#pragma mark -
+#pragma mark Keyboard Handling
 
 - (void)keyDown:(NSEvent *)theEvent
 {
-	[self interpretKeyEvents: [NSArray arrayWithObjects: theEvent, nil]];
+	[self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
 }
 
 
--(void)	moveUp:(id)sender
+- (void)moveUp:(id)sender
 {
-#pragma unused(sender)
-	NSUInteger		newSelectedRow = [_selectedRows firstIndex];
-	if( [_selectedRows count] == 0 )
-		newSelectedRow = _numberOfRows -1;	// NSTableView defaults to selecting last row for up-arrow w/o selection.
-	else
-	{
-		if( newSelectedRow > 0 )
-			newSelectedRow -= 1;
-	}
-	
-	[self setSelectedRow: newSelectedRow];
-	[self scrollRowToVisible: newSelectedRow];
+    if([_selectedRows count]>0) {
+        NSUInteger firstIndex = [_selectedRows firstIndex];
+        
+        if(firstIndex>0) {
+            NSUInteger newRow = firstIndex-1;
+            [self setSelectedRow:newRow];
+            [self scrollRowToVisible:newRow];
+        }
+    }
 }
 
 
--(void)	moveDown:(id)sender
+- (void)moveDown:(id)sender
 {
-#pragma unused(sender)
-	NSUInteger		newSelectedRow = [_selectedRows lastIndex];
-	if( [_selectedRows count] == 0 )
-		newSelectedRow = 0;	// NSTableView defaults to selecting first row for down-arrow w/o selection.
-	else
-	{
-		if( newSelectedRow < (_numberOfRows -1) )
-			newSelectedRow += 1;
-	}
-	
-	[self setSelectedRow: newSelectedRow];
-	[self scrollRowToVisible: newSelectedRow];
+    if([_selectedRows count]>0) {
+        NSUInteger lastIndex = [_selectedRows lastIndex];
+        
+        if(lastIndex<(_numberOfRows-1)) {
+            NSUInteger newRow = lastIndex+1;
+            [self setSelectedRow:newRow];
+            [self scrollRowToVisible:newRow];
+        }
+    }
 }
 
 
--(BOOL)	validateMenuItem: (NSMenuItem *)menuItem
+- (BOOL)validateMenuItem:(NSMenuItem*)menuItem
 {
-	if( [menuItem action] == @selector(selectAll:) )
+	if([menuItem action] == @selector(selectAll:))
 	{
 		return _allowsMultipleSelection && [_selectedRows count] != _numberOfRows;	// No "select all" if everything's already selected or we can only select one row.
 	}
-	else if( [menuItem action] == @selector(deselectAll:) )
+	
+    if([menuItem action] == @selector(deselectAll:))
 	{
 		return _allowsEmptySelection && [_selectedRows count] != 0;	// No "deselect all" if nothing's selected or we must have at least one row selected.
 	}
-	else
-		return NO;
+    
+    return NO;
 }
 
+#pragma mark -
+#pragma mark Selection
 
--(void)	selectAll: (id)sender
+- (void)selectAll:(id)sender
 {
-#pragma unused(sender)
-	if( _allowsMultipleSelection )
-	{
-		[self setSelectedRows: [NSIndexSet indexSetWithIndexesInRange: NSMakeRange(0, _numberOfRows)]];
+	if(_allowsMultipleSelection) {
+		[self setSelectedRows:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, _numberOfRows)]];
 	}
 }
 
-
-
--(void)	deselectAll: (id)sender
+- (void)deselectAll:(id)sender
 {
-#pragma unused(sender)
-	[self setSelectedRows: [NSIndexSet indexSet]];
+	[self setSelectedRows:[NSIndexSet indexSet]];
 }
-
 
 #pragma mark -
 #pragma mark Layout

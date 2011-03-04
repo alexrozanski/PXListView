@@ -31,6 +31,8 @@
 
 	BOOL _allowsEmptySelection;
 	BOOL _allowsMultipleSelection;
+    NSInteger _lastSelectedRow;
+    
 	BOOL _verticalMotionCanBeginDrag;
     
     BOOL _usesLiveResize;
