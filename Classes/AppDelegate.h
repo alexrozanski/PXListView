@@ -12,12 +12,12 @@
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, PXListViewDelegate>
 {
-    IBOutlet NSWindow	*window;
+    IBOutlet NSWindow *window;
 	IBOutlet PXListView	*listView;
 	
-	NSMutableArray		*_listItems;
+	NSMutableArray *_listItems;
 }
 
-- (IBAction) reloadTable: (id)sender;
+- (IBAction)reloadTable:(id)sender;
 
 @end

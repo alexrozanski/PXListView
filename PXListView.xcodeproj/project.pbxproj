@@ -17,6 +17,7 @@
 		D278592411B1BA6C00F1CF30 /* PXListDocumentView.m in Sources */ = {isa = PBXBuildFile; fileRef = D278592311B1BA6C00F1CF30 /* PXListDocumentView.m */; };
 		D278597011B1BBE800F1CF30 /* MyListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = D278596F11B1BBE800F1CF30 /* MyListViewCell.m */; };
 		D279A64411B4E95600771B2A /* PXListView+Private.h in Resources */ = {isa = PBXBuildFile; fileRef = D279A64311B4E95600771B2A /* PXListView+Private.h */; };
+		D2BED6C01320E08D00E1D0D3 /* MyListViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = D2BED6BF1320E08D00E1D0D3 /* MyListViewCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		D279A64311B4E95600771B2A /* PXListView+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PXListView+Private.h"; path = "Classes/PXListView+Private.h"; sourceTree = "<group>"; };
 		D279A65E11B4EB1200771B2A /* README.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.markdown; sourceTree = "<group>"; wrapsLines = 1; };
 		D279A6DD11B4EFCD00771B2A /* PXListViewCell+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PXListViewCell+Private.h"; path = "Classes/PXListViewCell+Private.h"; sourceTree = "<group>"; };
+		D2BED6BF1320E08D00E1D0D3 /* MyListViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MyListViewCell.xib; path = Resources/MyListViewCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +127,7 @@
 				D26669CC11B1B2F8007597F1 /* PXListView-Info.plist */,
 				D26669CE11B1B302007597F1 /* InfoPlist.strings */,
 				D26669D011B1B302007597F1 /* MainMenu.xib */,
+				D2BED6BF1320E08D00E1D0D3 /* MyListViewCell.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -199,7 +202,11 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "PXListView" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* PXListView */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -217,6 +224,7 @@
 				D26669D211B1B302007597F1 /* InfoPlist.strings in Resources */,
 				D26669D311B1B302007597F1 /* MainMenu.xib in Resources */,
 				D279A64411B4E95600771B2A /* PXListView+Private.h in Resources */,
+				D2BED6C01320E08D00E1D0D3 /* MyListViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

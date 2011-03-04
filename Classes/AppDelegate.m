@@ -14,7 +14,7 @@
 #pragma mark Constants
 
 #define LISTVIEW_CELL_IDENTIFIER		@"MyListViewCell"
-#define NUM_EXAMPLE_ITEMS				10
+#define NUM_EXAMPLE_ITEMS				100
 
 
 @implementation AppDelegate
@@ -22,20 +22,20 @@
 #pragma mark -
 #pragma mark Init/Dealloc
 
--(void)	awakeFromNib
+- (void)awakeFromNib
 {
-	[listView setCellSpacing: 2.0f];
-	//[listView setAllowsEmptySelection: YES];
-	[listView setAllowsMultipleSelection: YES];
-	[listView registerForDraggedTypes: [NSArray arrayWithObjects: NSStringPboardType, nil]];
+	[listView setCellSpacing:2.0f];
+	//[listView setAllowsEmptySelection:YES];
+	[listView setAllowsMultipleSelection:YES];
+	[listView registerForDraggedTypes:[NSArray arrayWithObjects: NSStringPboardType, nil]];
 	
 	_listItems = [[NSMutableArray alloc] init];
 
-	// Create a bunch of rows as a test:
+	//Create a bunch of rows as a test
 	for( NSInteger i = 0; i < NUM_EXAMPLE_ITEMS; i++ )
 	{
-		NSString *title = [[NSString alloc] initWithFormat: @"Item %d", i +1]; // We're in a tight loop
-		[_listItems addObject: title];
+		NSString *title = [[NSString alloc] initWithFormat: @"Item %d", i +1];
+		[_listItems addObject:title];
 		[title release];
 	}
 	
@@ -44,7 +44,8 @@
 
 - (void)dealloc
 {
-	[_listItems release];
+	[_listItems release], _listItems=nil;
+    
 	[super dealloc];
 }
 
@@ -62,28 +63,25 @@
 	MyListViewCell *cell = (MyListViewCell*)[aListView dequeueCellWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER];
 	
 	if(!cell) {
-		cell = [[[MyListViewCell alloc] initWithReusableIdentifier:LISTVIEW_CELL_IDENTIFIER] autorelease];
+        NSLog(@"alloc");
+		cell = [MyListViewCell cellLoadedFromNibNamed:@"MyListViewCell" reusableIdentifier:LISTVIEW_CELL_IDENTIFIER];
 	}
 	
 	// Set up the new cell:
-	[cell setTitle: [_listItems objectAtIndex: row]];
+	[[cell titleLabel] setStringValue:[_listItems objectAtIndex:row]];
 	
 	return cell;
 }
 
 - (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSUInteger)row
 {
-#pragma unused(aListView)
-#pragma unused(row)
 	return 50;
 }
 
 
 // The following are only needed for drag'n drop:
-- (BOOL)	listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)dragPasteboard
+- (BOOL)listView:(PXListView*)aListView writeRowsWithIndexes:(NSIndexSet*)rowIndexes toPasteboard:(NSPasteboard*)dragPasteboard
 {
-#pragma unused(aListView)
-#pragma unused(rowIndexes)
 	// +++ Actually drag the items, not just dummy data.
 	[dragPasteboard declareTypes: [NSArray arrayWithObjects: NSStringPboardType, nil] owner: self];
 	[dragPasteboard setString: @"Just Testing" forType: NSStringPboardType];
@@ -91,19 +89,14 @@
 	return YES;
 }
 
-- (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
-							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
+- (NSDragOperation)listView:(PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
+							proposedDropHighlight:(PXListViewDropHighlight)dropHighlight;
 {
-#pragma unused(aListView)
-#pragma unused(info)
-#pragma unused(row)
-#pragma unused(dropHighlight)
 	return NSDragOperationCopy;
 }
 
-- (IBAction) reloadTable: (id)sender
+- (IBAction) reloadTable:(id)sender
 {
-#pragma unused(sender)
 	[listView reloadData];
 }
 

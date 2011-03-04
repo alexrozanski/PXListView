@@ -13,57 +13,33 @@
 
 @implementation MyListViewCell
 
-@synthesize title = _title;
-
-#if DEBUG
-// Counter for the amount of current cells
-+ (void)updateCount:(BOOL)status {
-	static NSInteger count = 0;
-	if (status) {
-		count++;
-	} else {
-		count--;
-	}
-	NSLog(@"Current amount of allocated cells: %d", count);
-}
-#endif
+@synthesize titleLabel;
 
 #pragma mark -
 #pragma mark Init/Dealloc
 
-- (id)	initWithReusableIdentifier: (NSString*)identifier
+- (id)initWithReusableIdentifier: (NSString*)identifier
 {
-	if(( self = [super initWithReusableIdentifier: identifier] ))
+	if((self = [super initWithReusableIdentifier:identifier]))
 	{
-#if DEBUG
-		NSLog(@"Allocating cell");
-		[MyListViewCell updateCount:YES];
-#endif
 	}
 	
 	return self;
 }
 
-- (void)	dealloc
+- (void)dealloc
 {
-#if DEBUG
-	NSLog(@"Deallocating cell");
-	[MyListViewCell updateCount:NO];
-#endif
-	[_title release];
+	[titleLabel release], titleLabel=nil;
+    
 	[super dealloc];
 }
 
 #pragma mark -
 #pragma mark Reuse
 
-- (void)	prepareForReuse
+- (void)prepareForReuse
 {
-#if DEBUG
-	NSLog(@"Reusing cell");
-#endif
-	[_title release];
-	_title = nil;
+	[titleLabel setStringValue:@""];
 }
 
 #pragma mark -
@@ -71,29 +47,17 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-	NSRect bounds = [self bounds];
-	NSDictionary *attributes = nil;
-	
 	// Draw the border and background:
-	if( [self isSelected] )
+	if([self isSelected])
 	{
 		[[NSColor selectedControlColor] set];
-		attributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSColor selectedControlTextColor], NSForegroundColorAttributeName, nil];
 	}
-	else
+	else {
 		[[NSColor whiteColor] set];
+    }
 
-	NSBezierPath*	roundedRect = [NSBezierPath bezierPathWithRoundedRect: [self bounds] xRadius: 6.0 yRadius: 6.0];
+	NSBezierPath *roundedRect = [NSBezierPath bezierPathWithRoundedRect:[self bounds] xRadius:6.0 yRadius:6.0];
 	[roundedRect fill];
-	[[NSColor darkGrayColor] set];
-	
-	// Draw the title:
-	[[NSColor blackColor] set];
-	NSSize titleSize = [_title sizeWithAttributes: attributes];
-	[_title drawAtPoint: NSMakePoint(5.0f, NSMaxY(bounds)-titleSize.height-5) withAttributes: attributes];
-	[attributes release];
-	
-	[super drawRect: dirtyRect];
 }
 
 
@@ -134,7 +98,7 @@
 	else if( [attribute isEqualToString: NSAccessibilityDescriptionAttribute]
 			or [attribute isEqualToString: NSAccessibilityTitleAttribute] )
 	{
-		return _title;
+		return [titleLabel stringValue];
 	}
 	else if( [attribute isEqualToString: NSAccessibilityEnabledAttribute] )
 	{

@@ -12,9 +12,9 @@
 
 @interface MyListViewCell : PXListViewCell
 {
-	NSString		*_title;
+	NSTextField *titleLabel;
 }
 
-@property (copy) NSString *title;
+@property (nonatomic, retain) IBOutlet NSTextField *titleLabel;
 
 @end
