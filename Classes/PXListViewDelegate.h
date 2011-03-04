@@ -15,18 +15,19 @@
 @protocol PXListViewDelegate <NSObject>
 
 @required
-- (NSUInteger)		numberOfRowsInListView: (PXListView*)aListView;
-- (CGFloat)			listView: (PXListView*)aListView heightOfRow: (NSUInteger)row;
-
-@optional	// You *must* implement ONE of the following two:
--(NSViewController*)	listView: (PXListView*)aListView viewControllerForRow: (NSUInteger)row;
--(PXListViewCell*)		listView: (PXListView*)aListView cellForRow: (NSUInteger)row;
+- (NSUInteger)numberOfRowsInListView:(PXListView*)aListView;
+- (CGFloat)listView:(PXListView*)aListView heightOfRow:(NSUInteger)row;
+- (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSUInteger)row;
 
 @optional
-- (BOOL)			listView: (PXListView*)aListView writeRowsWithIndexes: (NSIndexSet *)rowIndexes toPasteboard: (NSPasteboard *)pboard;
-- (NSDragOperation)	listView: (PXListView*)aListView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSUInteger)row
-							proposedDropHighlight: (PXListViewDropHighlight)dropHighlight;
-- (BOOL)			listView: (PXListView*)aListView acceptDrop: (id <NSDraggingInfo>)info
-							row:(NSUInteger)row dropHighlight: (PXListViewDropHighlight)dropHighlight;
+- (BOOL)listView:(PXListView*)aListView writeRowsWithIndexes:(NSIndexSet*)rowIndexes toPasteboard:(NSPasteboard *)pboard;
+- (NSDragOperation)listView:(PXListView*)aListView
+               validateDrop:(id <NSDraggingInfo>)info
+                proposedRow:(NSUInteger)row
+      proposedDropHighlight:(PXListViewDropHighlight)dropHighlight;
+- (BOOL)listView:(PXListView*)aListView
+      acceptDrop:(id <NSDraggingInfo>)info
+             row:(NSUInteger)row
+   dropHighlight:(PXListViewDropHighlight)dropHighlight;
 
 @end
