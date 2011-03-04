@@ -39,6 +39,9 @@ When responding to `-listView:cellForRow:`, the delegate should first call `-deq
 You can also load cells from NIBs easily, by using `PXListViewCell`'s class method `+cellLoadedFromNibNamed:reusableIdentifier:`. This loads the NIB whose name is passed in, and returns the first list view cell it finds. To create a NIB which is compatible with this feature, just create a blank NIB and add a view. Make sure you set its class to your `PXListViewCell` subclass name, layout your cell as you see fit, and save. When you call `+cellLoadedFromNibNamed:reusableIdentifier:` with the name of your NIB, your new cell will be returned autoreleased, which can then be returned from `-listView:cellForRow:`. There is no need to set a File's Owner for your new NIB.
 
 
+###Live Resize###
+`PXListView` has a property, `usesLiveResize` which determines whether the control should be updated continuously during a resize or not. By default, the cells will be updated continuously as the control is resized. Although visually preferable, especially when dealing with large data sets, this can cause the UI to become slow, so this can be turned off by setting the property to `NO`.
+
 ###Optimizations###
 `PXListView` only keeps the bare minimum of list view cells in the view hierarchy to be performant, and when rows are scrolled onscreen new cells are added to the view hierarchy to display the rows, and when the rows are scrolled offscreen the associated cells are removed from the view hierarchy.
 

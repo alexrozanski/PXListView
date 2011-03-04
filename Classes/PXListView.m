@@ -83,6 +83,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 @synthesize allowsMultipleSelection = _allowsMultipleSelection;
 @synthesize allowsEmptySelection = _allowsEmptySelection;
 @synthesize verticalMotionCanBeginDrag = _verticalMotionCanBeginDrag;
+@synthesize usesLiveResize = _usesLiveResize;
 
 #pragma mark -
 #pragma mark Init/Dealloc
@@ -95,6 +96,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		_visibleCells = [[NSMutableArray alloc] init];
 		_selectedRows = [[NSMutableIndexSet alloc] init];
 		_allowsEmptySelection = YES;
+        _usesLiveResize = YES;
 	}
 	
 	return self;
@@ -108,6 +110,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		_visibleCells = [[NSMutableArray alloc] init];
 		_selectedRows = [[NSMutableIndexSet alloc] init];
 		_allowsEmptySelection = YES;
+        _usesLiveResize = YES;
 	}
 	
 	return self;
@@ -366,11 +369,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (void)updateCells
 {	
-	//Resizing all the cells in live resize is computationally pretty expensive; however make this a property?
-	if(_inLiveResize) {
-		return;
-	}
-	
 	NSRange visibleRange = [self visibleRange];
 	NSRange intersectionRange = NSIntersectionRange(visibleRange, _currentRange);
 	
@@ -722,7 +720,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	//message to resize the visible cells
 	[super resizeWithOldSuperviewSize:oldBoundsSize];
 	
-	if(!_inLiveResize)
+	if(![self inLiveResize]||[self usesLiveResize])
 	{
 		[_visibleCells removeAllObjects];
 		[[self documentView] setSubviews:[NSArray array]];
@@ -1072,7 +1070,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
--(void)	setDropRow: (NSUInteger)row dropHighlight: (PXListViewDropHighlight)dropHighlight
+-(void)setDropRow:(NSUInteger)row dropHighlight: (PXListViewDropHighlight)dropHighlight
 {
 	_dropRow = row;
 	_dropHighlight = dropHighlight;
@@ -1083,25 +1081,21 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 #pragma mark -
 #pragma mark Sizing
 
-- (void)viewWillStartLiveResize
-{
-	_inLiveResize = YES;
-}
-
 - (void)viewDidEndLiveResize
 {
 	[super viewDidEndLiveResize];
 	
-	// Change the layout of the cells:
-	[_visibleCells removeAllObjects];
-	[[self documentView] setSubviews:[NSArray array]];
-	
-	[self cacheCellLayout];
-	[self addCellsFromVisibleRange];
-	
-	_currentRange = [self visibleRange];
-	
-	_inLiveResize = NO;
+    //If we use live resize the view will already be up to date
+    if(![self usesLiveResize]) {
+        //Change the layout of the cells
+        [_visibleCells removeAllObjects];
+        [[self documentView] setSubviews:[NSArray array]];
+        
+        [self cacheCellLayout];
+        [self addCellsFromVisibleRange];
+        
+        _currentRange = [self visibleRange];
+    }
 }
 
 #pragma mark -

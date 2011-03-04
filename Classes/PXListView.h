@@ -28,11 +28,11 @@
 	CGFloat *_cellYOffsets;
 	
 	CGFloat _cellSpacing;
-	
-	BOOL _inLiveResize;
+
 	BOOL _allowsEmptySelection;
 	BOOL _allowsMultipleSelection;
 	BOOL _verticalMotionCanBeginDrag;
+    BOOL _usesLiveResize;
 	
 	NSUInteger _dropRow;
 	PXListViewDropHighlight	_dropHighlight;
@@ -48,6 +48,7 @@
 @property (nonatomic, assign) BOOL verticalMotionCanBeginDrag;
 
 @property (nonatomic, assign) CGFloat cellSpacing;
+@property (nonatomic, assign) BOOL usesLiveResize;
 
 - (void)reloadData;
 

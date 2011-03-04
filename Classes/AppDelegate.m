@@ -26,7 +26,7 @@
 {
 	[listView setCellSpacing:2.0f];
 	//[listView setAllowsEmptySelection:YES];
-	[listView setAllowsMultipleSelection:YES];
+	[listView setAllowsMultipleSelection:NO];
 	[listView registerForDraggedTypes:[NSArray arrayWithObjects: NSStringPboardType, nil]];
 	
 	_listItems = [[NSMutableArray alloc] init];
