@@ -26,10 +26,12 @@ Each row in the list view is displayed using an instance of `PXListViewCell` (wh
 ###Returning cells###
 When responding to `-listView:cellForRow:`, the delegate should first call `-dequeueCellWithReusableIdentifier:` on the list view, passing in the reusable cell identifier, to see if there are any reusable cells available. If this returns `nil` then a new cell can be created using the initializer `initWithReusableIdentifier:` (declared on PXListViewCell). this keeps the memory footprint of the control as low as possible by reusing cells that have been scrolled offscreen, removed from the view hierarchy and cached.
 
+You can also load cells from NIBs easily, by using `PXListViewCell`'s class method `+cellLoadedFromNibNamed:reusableIdentifier:`. This loads the NIB whose name is passed in, and returns the first list view cell it finds. To create a NIB which is compatible with this feature, just create a blank NIB and add a view. Make sure you set its class to your `PXListViewCell` subclass name, layout your cell as you see fit, and save. When you call `+cellLoadedFromNibNamed:reusableIdentifier:` with the name of your NIB, your new cell will be returned autoreleased, which can then be returned from `-listView:cellForRow:`. There is no need to set a File's Owner for your new NIB.
+
 ###Using PXListViewCell###
 `PXListViewCell` is an abstract superclass, implementing the bare minimum for such features as cell selection and declaring methods relied on by the list view.
 
-You should create a concrete subclass of `PXListViewCell` when using it in the list view, where `drawRect:` can be overridden to do custom drawing, and properties used to store data for the cell can be declared on this subclass. The example project (as part of the repository) shows this.
+You should create a concrete subclass of `PXListViewCell` when using it in the list view, where `drawRect:` can be overridden to do custom drawing, and properties for cell UI outlets or data can be declared on this subclass. The example project (as part of the repository) shows this. Since `PXListViewCell`s are views, it is easy to use a NIB to design your cell template, and makes adding text fields, buttons, images etc a much simpler process.
 
 Attributions
 ------------
