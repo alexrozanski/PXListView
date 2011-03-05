@@ -5,7 +5,3 @@
 #ifdef __OBJC__
     #import <Cocoa/Cocoa.h>
 #endif
-
-#if DEBUG
-#define PXLog(...)	NSLog(__VA_ARGS__)
-#endif

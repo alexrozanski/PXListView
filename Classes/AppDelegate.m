@@ -14,7 +14,7 @@
 #pragma mark Constants
 
 #define LISTVIEW_CELL_IDENTIFIER		@"MyListViewCell"
-#define NUM_EXAMPLE_ITEMS				100
+#define NUM_EXAMPLE_ITEMS				10
 
 
 @implementation AppDelegate
@@ -25,8 +25,8 @@
 - (void)awakeFromNib
 {
 	[listView setCellSpacing:2.0f];
-	//[listView setAllowsEmptySelection:YES];
-	[listView setAllowsMultipleSelection:NO];
+	[listView setAllowsEmptySelection:YES];
+	[listView setAllowsMultipleSelection:YES];
 	[listView registerForDraggedTypes:[NSArray arrayWithObjects: NSStringPboardType, nil]];
 	
 	_listItems = [[NSMutableArray alloc] init];
