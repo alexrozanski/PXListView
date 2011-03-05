@@ -25,7 +25,12 @@
 
 + (id)cellLoadedFromNibNamed:(NSString*)nibName reusableIdentifier:(NSString*)identifier
 {
-    NSNib *cellNib = [[NSNib alloc] initWithNibNamed:nibName bundle:nil];
+    return [self cellLoadedFromNibNamed:nibName bundle:nil reusableIdentifier:identifier];
+}
+
++ (id)cellLoadedFromNibNamed:(NSString*)nibName bundle:(NSBundle*)bundle reusableIdentifier:(NSString*)identifier
+{
+    NSNib *cellNib = [[NSNib alloc] initWithNibNamed:nibName bundle:bundle];
     NSArray *objects = nil;
     
     id cell = nil;
