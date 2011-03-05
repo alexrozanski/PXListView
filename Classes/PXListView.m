@@ -730,31 +730,81 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 #pragma mark -
 #pragma mark Scrolling
 
--(void)	contentViewBoundsDidChange:(NSNotification *)notification
+- (void)contentViewBoundsDidChange:(NSNotification *)notification
 {
-#pragma unused(notification)
 	[self updateCells];
 }
 
-
--(void)	scrollRowToVisible: (NSUInteger)row
+- (void)scrollToRow:(NSUInteger)row
 {
-	if(row >= _numberOfRows)
+    if(row >= _numberOfRows) {
+        return;
+    }
+    
+    // Use minimal scroll necessary, so we don't force the selection to upper left of window:
+	NSRect visibleRect = [self documentVisibleRect];
+	NSRect rowRect = [self rectOfRow:row];
+	
+	NSPoint newScrollPoint = rowRect.origin;
+    
+    //Have we over-scrolled?
+	if(NSMaxY(rowRect) > NSMaxY(visibleRect)) {
+		newScrollPoint.y = _totalHeight - NSHeight(visibleRect);
+    }
+	
+	[[self contentView] scrollToPoint:newScrollPoint];
+	[self reflectScrolledClipView:[self contentView]];
+}
+
+- (void)scrollRowToVisible:(NSUInteger)row
+{
+	if(row >= _numberOfRows) {
 		return;
+    }
 	
 	// Use minimal scroll necessary, so we don't force the selection to upper left of window:
-	NSRect		visRect = [self documentVisibleRect];
-	NSRect		rowRect = [self rectOfRow: row];
-	if( NSContainsRect(visRect, rowRect) )	// Already visible, no need to scroll.
+	NSRect visibleRect = [self documentVisibleRect];
+	NSRect rowRect = [self rectOfRow:row];
+    
+	if(NSContainsRect(visibleRect, rowRect)) {	// Already visible, no need to scroll.
 		return;
+    }
 	
-	NSPoint		newScrollPoint = rowRect.origin;
-	if( NSMaxY(rowRect) > NSMaxY(visRect) )	// Have to scroll it so it's last visible row.
-		newScrollPoint.y -= (visRect.size.height -rowRect.size.height);
-	newScrollPoint = [[self contentView] constrainScrollPoint: newScrollPoint];
+	NSPoint newScrollPoint = rowRect.origin;
+    
+    //Have we over-scrolled?
+	if(NSMaxY(rowRect) > NSMaxY(visibleRect)) {
+		newScrollPoint.y = _totalHeight - NSHeight(visibleRect);
+    }
 	
-	[[self contentView] scrollToPoint: newScrollPoint];
-	[self reflectScrolledClipView: [self contentView]];
+	[[self contentView] scrollToPoint:newScrollPoint];
+	[self reflectScrolledClipView:[self contentView]];
+}
+
+
+#pragma mark -
+#pragma mark Sizing
+
+- (void)viewWillStartLiveResize
+{
+    _widthPriorToResize = NSWidth([self contentViewRect]);
+}
+
+- (void)viewDidEndLiveResize
+{
+	[super viewDidEndLiveResize];
+	
+    //If we use live resize the view will already be up to date
+    if(![self usesLiveResize]) {
+        //Change the layout of the cells
+        [_visibleCells removeAllObjects];
+        [[self documentView] setSubviews:[NSArray array]];
+        
+        [self cacheCellLayout];
+        [self addCellsFromVisibleRange];
+        
+        _currentRange = [self visibleRange];
+    }
 }
 
 
@@ -1071,31 +1121,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	_dropHighlight = dropHighlight;
 	
 	[self setNeedsDisplay: YES];
-}
-
-#pragma mark -
-#pragma mark Sizing
-
-- (void)viewWillStartLiveResize
-{
-    _widthPriorToResize = NSWidth([self contentViewRect]);
-}
-
-- (void)viewDidEndLiveResize
-{
-	[super viewDidEndLiveResize];
-	
-    //If we use live resize the view will already be up to date
-    if(![self usesLiveResize]) {
-        //Change the layout of the cells
-        [_visibleCells removeAllObjects];
-        [[self documentView] setSubviews:[NSArray array]];
-        
-        [self cacheCellLayout];
-        [self addCellsFromVisibleRange];
-        
-        _currentRange = [self visibleRange];
-    }
 }
 
 #pragma mark -

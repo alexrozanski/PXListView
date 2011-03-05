@@ -63,7 +63,8 @@
 - (void)deselectRows;
 - (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection:(BOOL)doExtend;
 
-- (void)scrollRowToVisible: (NSUInteger)row;
+- (void)scrollToRow:(NSUInteger)row;
+- (void)scrollRowToVisible:(NSUInteger)row;
 
 - (NSImage*)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows
                                   event:(NSEvent*)dragEvent clickedCell:(PXListViewCell*)clickedCell
