@@ -14,6 +14,9 @@
 #import "PXListViewCell.h"
 #import "PXListViewCell+Private.h"
 
+NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
+
+
 // Apple sadly doesn't provide CGFloat variants of these:
 #if CGFLOAT_IS_DOUBLE
 #define CGFLOATABS(n)	fabs(n)
@@ -78,7 +81,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 @implementation PXListView
 
-@synthesize delegate = _delegate;
 @synthesize cellSpacing = _cellSpacing;
 @synthesize allowsMultipleSelection = _allowsMultipleSelection;
 @synthesize allowsEmptySelection = _allowsEmptySelection;
@@ -145,6 +147,27 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 #pragma mark -
 #pragma mark Data Handling
 
+- (id<PXListViewDelegate>)delegate
+{
+    return _delegate;
+}
+
+- (void)setDelegate:(id<PXListViewDelegate>)delegate
+{
+    [_delegate removeObserver:_delegate
+                         name:PXListViewSelectionDidChange
+                       object:self];
+     
+    _delegate = delegate;
+    
+    if([_delegate respondsToSelector:@selector(listViewSelectionDidChange:)]) {
+        [[NSNotificationCenter defaultCenter] addObserver:_delegate
+                                                 selector:@selector(listViewSelectionDidChange:)
+                                                     name:PXListViewSelectionDidChange
+                                                   object:self];
+    }
+}
+
 - (void)reloadData
 {
 	id <PXListViewDelegate> delegate = [self delegate];
@@ -210,17 +233,23 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection:(BOOL)shouldExtend
 {
+    NSMutableIndexSet *updatedCellIndexes = [NSMutableIndexSet indexSet];
+    
 	if(!shouldExtend) {
-		[self deselectRowIndexes: _selectedRows];	// +++ Optimize. Could intersect sets and only deselect what's needed.
+        [updatedCellIndexes addIndexes:_selectedRows];
+		[_selectedRows removeAllIndexes];
 	}
 	
-	[_selectedRows addIndexes:rows];	// _selectedRows is empty if !doExtend, because we just deselected all.
+	[_selectedRows addIndexes:rows];
+    [updatedCellIndexes addIndexes:rows]; 
 
-	NSArray *newSelectedCells = [self visibleCellsForRowIndexes:rows];
-	for(PXListViewCell *newSelectedCell in newSelectedCells)
+	NSArray *updatedCells = [self visibleCellsForRowIndexes:updatedCellIndexes];
+	for(PXListViewCell *cell in updatedCells)
 	{
-		[newSelectedCell setNeedsDisplay: YES];
+		[cell setNeedsDisplay:YES];
 	}
+    
+    [self postSelectionDidChangeNotification];
 }
 
 
@@ -229,16 +258,23 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	NSArray *oldSelectedCells = [self visibleCellsForRowIndexes:rows];
 	[_selectedRows removeIndexes:rows];
 	
-	for( PXListViewCell *oldSelectedCell in oldSelectedCells )
+	for(PXListViewCell *oldSelectedCell in oldSelectedCells)
 	{
-		[oldSelectedCell setNeedsDisplay: YES];
+		[oldSelectedCell setNeedsDisplay:YES];
 	}
+
+    [self postSelectionDidChangeNotification];
 }
 
 
 - (void)deselectRows
 {
-	[self deselectRowIndexes: _selectedRows];
+	[self deselectRowIndexes:_selectedRows];
+}
+
+- (void)postSelectionDidChangeNotification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:PXListViewSelectionDidChange object:self];
 }
 
 
@@ -489,7 +525,6 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
     
     //Behaviour for multiple selection
     if([self allowsMultipleSelection]) {
-        
     }
     
 	//If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:

@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "PXListViewDropHighlight.h"
 
+extern NSString * const PXListViewSelectionDidChange;
 
 @class PXListView, PXListViewCell;
 
@@ -20,6 +21,8 @@
 - (PXListViewCell*)listView:(PXListView*)aListView cellForRow:(NSUInteger)row;
 
 @optional
+- (void)listViewSelectionDidChange:(NSNotification*)aNotification;
+
 - (BOOL)listView:(PXListView*)aListView writeRowsWithIndexes:(NSIndexSet*)rowIndexes toPasteboard:(NSPasteboard *)pboard;
 - (NSDragOperation)listView:(PXListView*)aListView
                validateDrop:(id <NSDraggingInfo>)info

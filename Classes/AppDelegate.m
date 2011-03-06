@@ -77,6 +77,11 @@
 	return 50;
 }
 
+- (void)listViewSelectionDidChange:(NSNotification*)aNotification
+{
+    NSLog(@"Selection changed");
+}
+
 
 // The following are only needed for drag'n drop:
 - (BOOL)listView:(PXListView*)aListView writeRowsWithIndexes:(NSIndexSet*)rowIndexes toPasteboard:(NSPasteboard*)dragPasteboard
