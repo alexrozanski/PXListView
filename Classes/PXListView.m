@@ -137,84 +137,6 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 	}
 }
 
-
-- (void)setSelectedRow:(NSUInteger)row
-{
-	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection: NO];
-}
-
-
-- (NSUInteger)selectedRow
-{
-	if( [_selectedRows count] == 1 ) {
-		return [_selectedRows firstIndex];
-	}
-	else {
-		//This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
-		return NSUIntegerMax;
-	}
-}
-
-
-- (void)setSelectedRows:(NSIndexSet *)rowIndexes
-{
-	[self selectRowIndexes:rowIndexes byExtendingSelection:NO];
-}
-
-
-- (NSIndexSet*)selectedRows
-{
-	return _selectedRows;	// +++ Copy/autorelease?
-}
-
-
-- (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection:(BOOL)shouldExtend
-{
-    NSMutableIndexSet *updatedCellIndexes = [NSMutableIndexSet indexSet];
-    
-	if(!shouldExtend) {
-        [updatedCellIndexes addIndexes:_selectedRows];
-		[_selectedRows removeAllIndexes];
-	}
-	
-	[_selectedRows addIndexes:rows];
-    [updatedCellIndexes addIndexes:rows]; 
-
-	NSArray *updatedCells = [self visibleCellsForRowIndexes:updatedCellIndexes];
-	for(PXListViewCell *cell in updatedCells)
-	{
-		[cell setNeedsDisplay:YES];
-	}
-    
-    [self postSelectionDidChangeNotification];
-}
-
-
-- (void)deselectRowIndexes:(NSIndexSet*)rows
-{
-	NSArray *oldSelectedCells = [self visibleCellsForRowIndexes:rows];
-	[_selectedRows removeIndexes:rows];
-	
-	for(PXListViewCell *oldSelectedCell in oldSelectedCells)
-	{
-		[oldSelectedCell setNeedsDisplay:YES];
-	}
-
-    [self postSelectionDidChangeNotification];
-}
-
-
-- (void)deselectRows
-{
-	[self deselectRowIndexes:_selectedRows];
-}
-
-- (void)postSelectionDidChangeNotification
-{
-    [[NSNotificationCenter defaultCenter] postNotificationName:PXListViewSelectionDidChange object:self];
-}
-
-
 - (NSUInteger)numberOfRows
 {
 	return _numberOfRows;
@@ -423,6 +345,82 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 - (void)deselectAll:(id)sender
 {
 	[self setSelectedRows:[NSIndexSet indexSet]];
+}
+
+- (void)setSelectedRow:(NSUInteger)row
+{
+	[self selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection: NO];
+}
+
+
+- (NSUInteger)selectedRow
+{
+	if( [_selectedRows count] == 1 ) {
+		return [_selectedRows firstIndex];
+	}
+	else {
+		//This gives -1 for 0 selected items (backwards compatible) *and* for multiple selections.
+		return NSUIntegerMax;
+	}
+}
+
+
+- (void)setSelectedRows:(NSIndexSet *)rowIndexes
+{
+	[self selectRowIndexes:rowIndexes byExtendingSelection:NO];
+}
+
+
+- (NSIndexSet*)selectedRows
+{
+	return _selectedRows;	// +++ Copy/autorelease?
+}
+
+
+- (void)selectRowIndexes:(NSIndexSet*)rows byExtendingSelection:(BOOL)shouldExtend
+{
+    NSMutableIndexSet *updatedCellIndexes = [NSMutableIndexSet indexSet];
+    
+	if(!shouldExtend) {
+        [updatedCellIndexes addIndexes:_selectedRows];
+		[_selectedRows removeAllIndexes];
+	}
+	
+	[_selectedRows addIndexes:rows];
+    [updatedCellIndexes addIndexes:rows]; 
+    
+	NSArray *updatedCells = [self visibleCellsForRowIndexes:updatedCellIndexes];
+	for(PXListViewCell *cell in updatedCells)
+	{
+		[cell setNeedsDisplay:YES];
+	}
+    
+    [self postSelectionDidChangeNotification];
+}
+
+
+- (void)deselectRowIndexes:(NSIndexSet*)rows
+{
+	NSArray *oldSelectedCells = [self visibleCellsForRowIndexes:rows];
+	[_selectedRows removeIndexes:rows];
+	
+	for(PXListViewCell *oldSelectedCell in oldSelectedCells)
+	{
+		[oldSelectedCell setNeedsDisplay:YES];
+	}
+    
+    [self postSelectionDidChangeNotification];
+}
+
+
+- (void)deselectRows
+{
+	[self deselectRowIndexes:_selectedRows];
+}
+
+- (void)postSelectionDidChangeNotification
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:PXListViewSelectionDidChange object:self];
 }
 
 #pragma mark -
