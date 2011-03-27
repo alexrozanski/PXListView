@@ -61,18 +61,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		080E96DDFE201D6D7F000001 /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				D26669C911B1B2F1007597F1 /* AppDelegate.h */,
-				D26669CA11B1B2F1007597F1 /* AppDelegate.m */,
-				D278596E11B1BBE800F1CF30 /* MyListViewCell.h */,
-				D278596F11B1BBE800F1CF30 /* MyListViewCell.m */,
-				D27858D611B1B5FF00F1CF30 /* PXListView */,
-			);
-			name = Classes;
-			sourceTree = "<group>";
-		};
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -103,33 +91,23 @@
 			isa = PBXGroup;
 			children = (
 				D279A65E11B4EB1200771B2A /* README.markdown */,
-				080E96DDFE201D6D7F000001 /* Classes */,
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
-				29B97317FDCFA39411CA2CEA /* Resources */,
+				D25DDA7A133F568F0086783B /* PXListView */,
+				D25DDA7B133F569B0086783B /* Demo App */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = PXListView;
 			sourceTree = "<group>";
 		};
-		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+		29B97315FDCFA39411CA2CEA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
 				256AC3F00F4B6AF500CF3369 /* PXListView_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
-			);
-			name = "Other Sources";
-			sourceTree = "<group>";
-		};
-		29B97317FDCFA39411CA2CEA /* Resources */ = {
-			isa = PBXGroup;
-			children = (
 				D26669CC11B1B2F8007597F1 /* PXListView-Info.plist */,
 				D26669CE11B1B302007597F1 /* InfoPlist.strings */,
-				D26669D011B1B302007597F1 /* MainMenu.xib */,
-				D2BED6BF1320E08D00E1D0D3 /* MyListViewCell.xib */,
 			);
-			name = Resources;
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
@@ -141,7 +119,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		D27858D611B1B5FF00F1CF30 /* PXListView */ = {
+		D25DDA7A133F568F0086783B /* PXListView */ = {
 			isa = PBXGroup;
 			children = (
 				D27858D011B1B5EA00F1CF30 /* PXListView.h */,
@@ -149,9 +127,35 @@
 				D279A64311B4E95600771B2A /* PXListView+Private.h */,
 				D27858D711B1B6D400F1CF30 /* PXListViewDelegate.h */,
 				D279A68911B4ECAB00771B2A /* Cells */,
+				55B9AC9E11EA384C00416532 /* PXListViewDropHighlight.h */,
+				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
+				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
+				D279A6DD11B4EFCD00771B2A /* PXListViewCell+Private.h */,
 				D278592911B1BA7900F1CF30 /* Misc */,
 			);
 			name = PXListView;
+			sourceTree = "<group>";
+		};
+		D25DDA7B133F569B0086783B /* Demo App */ = {
+			isa = PBXGroup;
+			children = (
+				D26669C911B1B2F1007597F1 /* AppDelegate.h */,
+				D26669CA11B1B2F1007597F1 /* AppDelegate.m */,
+				D26669D011B1B302007597F1 /* MainMenu.xib */,
+				D25DDA7C133F56C10086783B /* Custom Cell */,
+				29B97315FDCFA39411CA2CEA /* Supporting Files */,
+			);
+			name = "Demo App";
+			sourceTree = "<group>";
+		};
+		D25DDA7C133F56C10086783B /* Custom Cell */ = {
+			isa = PBXGroup;
+			children = (
+				D278596E11B1BBE800F1CF30 /* MyListViewCell.h */,
+				D278596F11B1BBE800F1CF30 /* MyListViewCell.m */,
+				D2BED6BF1320E08D00E1D0D3 /* MyListViewCell.xib */,
+			);
+			name = "Custom Cell";
 			sourceTree = "<group>";
 		};
 		D278592911B1BA7900F1CF30 /* Misc */ = {
@@ -166,10 +170,6 @@
 		D279A68911B4ECAB00771B2A /* Cells */ = {
 			isa = PBXGroup;
 			children = (
-				55B9AC9E11EA384C00416532 /* PXListViewDropHighlight.h */,
-				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
-				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
-				D279A6DD11B4EFCD00771B2A /* PXListViewCell+Private.h */,
 			);
 			name = Cells;
 			sourceTree = "<group>";
