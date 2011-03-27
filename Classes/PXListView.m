@@ -469,7 +469,7 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 }
 
 
--(BOOL)	attemptDragWithMouseDown: (NSEvent*)theEvent inCell: (PXListViewCell*)theCell
+- (BOOL)attemptDragWithMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell
 {
 	PXIsDragStartResult	dragResult = PXIsDragStart( theEvent, 0.0 );
 	if( dragResult != PXIsDragStartMouseReleased /*&& (_verticalMotionCanBeginDrag || dragResult != PXIsDragStartMouseMovedVertically)*/ )	// Was a drag, not a click? Cool!
@@ -479,10 +479,10 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		NSPasteboard	*dragPasteboard = [NSPasteboard pasteboardWithUniqueName];
 		
 		if( [_delegate respondsToSelector: @selector(listView:writeRowsWithIndexes:toPasteboard:)]
-			and [_delegate listView: self writeRowsWithIndexes: _selectedRows toPasteboard: dragPasteboard] )
+           and [_delegate listView: self writeRowsWithIndexes: _selectedRows toPasteboard: dragPasteboard] )
 		{
 			[theCell dragImage: dragImage at: dragImageOffset offset: NSZeroSize event: theEvent
-						pasteboard: dragPasteboard source: self slideBack: YES];
+                    pasteboard: dragPasteboard source: self slideBack: YES];
 			
 			return YES;
 		}
@@ -491,57 +491,64 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return NO;
 }
 
-- (void)handleMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell
+- (void)handleMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
-	//theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
-	[[self window] makeFirstResponder:self];
+	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
+	[[self window] makeFirstResponder: self];
 	
-    BOOL shiftKeyPressed = ([theEvent modifierFlags] & NSShiftKeyMask)!=0;
-    BOOL cmdKeyPressed = ([theEvent modifierFlags] & NSCommandKeyMask)!=0;
-    
-	BOOL isCellSelected = [_selectedRows containsIndex:[theCell row]];
-
-    NSMutableIndexSet *newSelectedIndexes = [[_selectedRows mutableCopy] autorelease];    
-    NSInteger row = [theCell row];
-    
-    //Shared behaviour between multiple/single selection
-    if(!shiftKeyPressed&&!cmdKeyPressed) {
-        _lastSelectedRow = row;
-        
-        if(isCellSelected&&[self allowsEmptySelection]) {
-            if([_selectedRows count]==1) {
-                [newSelectedIndexes removeAllIndexes];
-            }
-            else {
-                [newSelectedIndexes removeAllIndexes];
-                [newSelectedIndexes addIndex:row];
-            }
-        }
-        else {
-            [newSelectedIndexes removeAllIndexes];
-            [newSelectedIndexes addIndex:row];
-        }
-    }
-    
-    //Behaviour for multiple selection
-    if([self allowsMultipleSelection]) {
-    }
-    
-	//If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
-	/*if(theEvent && isSelected && [self attemptDragWithMouseDown:theEvent inCell:theCell])
+	BOOL		tryDraggingAgain = YES;
+	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) or ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
+	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
+	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
+	
+	// If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
+	if( theEvent and isSelected and [self attemptDragWithMouseDown: theEvent inCell: theCell] )
 		return;
-	*/
-    
-    if(newSelectedIndexes) {
-        [self setSelectedRows:newSelectedIndexes];
-    }
+	
+	if( _allowsMultipleSelection )
+	{
+		if( isSelected && shouldToggle )
+		{
+			if( [_selectedRows count] == 1 && !_allowsEmptySelection )
+				return;
+			[self deselectRowIndexes: clickedIndexSet];
+		}
+		else if( !isSelected && shouldToggle )
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
+		else if( !isSelected && !shouldToggle )
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+		else if( isSelected && !shouldToggle && [_selectedRows count] != 1 )
+		{
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+			tryDraggingAgain = NO;
+		}
+	}
+	else if( shouldToggle && _allowsEmptySelection )
+	{
+		if( isSelected )
+		{
+			[self deselectRowIndexes: clickedIndexSet];
+			tryDraggingAgain = NO;
+		}
+		else
+			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+	}
+	else
+	{
+		[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+	}
+	
+	// If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
+	if( tryDraggingAgain && theEvent and [_selectedRows containsIndex: [theCell row]] )
+		[self attemptDragWithMouseDown: theEvent inCell: theCell];
 }
 
 
-- (void)handleMouseDownOutsideCells:(NSEvent*)theEvent
+- (void)handleMouseDownOutsideCells: (NSEvent*)theEvent
 {
-	[[self window] makeFirstResponder:self];
-
+#pragma unused(theEvent)
+	[[self window] makeFirstResponder: self];
+    
 	if( _allowsEmptySelection )
 		[self deselectRows];
 	else if( _numberOfRows > 1 )
