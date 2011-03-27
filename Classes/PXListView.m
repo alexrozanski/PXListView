@@ -319,6 +319,11 @@ static PXIsDragStartResult	PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	return nil;
 }
 
+- (NSArray*)visibleCells
+{
+    return [[_visibleCells copy] autorelease];
+}
+
 - (NSRange)visibleRange
 {
 	NSRect visibleRect = [[self contentView] documentVisibleRect];

@@ -63,6 +63,7 @@
 
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
 
+- (NSArray*)visibleCells;
 - (NSRange)visibleRange;
 - (NSRect)rectOfRow:(NSUInteger)row;
 - (void)deselectRows;
