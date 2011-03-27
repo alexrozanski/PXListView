@@ -72,10 +72,4 @@
 - (void)scrollToRow:(NSUInteger)row;
 - (void)scrollRowToVisible:(NSUInteger)row;
 
-- (NSImage*)dragImageForRowsWithIndexes:(NSIndexSet *)dragRows
-                                  event:(NSEvent*)dragEvent clickedCell:(PXListViewCell*)clickedCell
-                                 offset:(NSPointPointer)dragImageOffset;
-- (void)setShowsDropHighlight:(BOOL)inState;
-- (void)setDropRow:(NSUInteger)row dropHighlight:(PXListViewDropHighlight)dropHighlight;
-
 @end

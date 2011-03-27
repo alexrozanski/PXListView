@@ -13,6 +13,7 @@
 
 #import "PXListView.h"
 #import "PXListView+Private.h"
+#import "PXListView+UserInteraction.h"
 
 #pragma mark -
 
@@ -63,7 +64,7 @@
 }
 
 
-- (id)initWithCoder: (NSCoder *)aDecoder
+- (id)initWithCoder:(NSCoder *)aDecoder
 {
 	if((self = [super initWithCoder: aDecoder]))
 	{
@@ -96,19 +97,18 @@
 #pragma mark -
 #pragma mark Drag & Drop
 
--(void)	setDropHighlight: (PXListViewDropHighlight)inState
+- (void)setDropHighlight:(PXListViewDropHighlight)inState
 {
 	[[self listView] setShowsDropHighlight: inState != PXListViewDropNowhere];
 	
 	_dropHighlight = inState;
-	[self setNeedsDisplay: YES];
+	[self setNeedsDisplay:YES];
 }
 
 
--(void)	drawRect:(NSRect)dirtyRect
+- (void)drawRect:(NSRect)dirtyRect
 {
-#pragma unused(dirtyRect)
-	if( _dropHighlight == PXListViewDropAbove )
+	if(_dropHighlight == PXListViewDropAbove)
 	{
 		[[NSColor alternateSelectedControlColor] set];
 		NSRect		theBox = [self bounds];
@@ -117,7 +117,7 @@
 		[NSBezierPath setDefaultLineWidth: 2.0f];
 		[NSBezierPath strokeRect: theBox];
 	}
-	else if( _dropHighlight == PXListViewDropBelow )
+	else if(_dropHighlight == PXListViewDropBelow)
 	{
 		[[NSColor alternateSelectedControlColor] set];
 		NSRect		theBox = [self bounds];
@@ -126,7 +126,7 @@
 		[NSBezierPath setDefaultLineWidth: 2.0f];
 		[NSBezierPath strokeRect: theBox];
 	}
-	else if( _dropHighlight == PXListViewDropOn )
+	else if(_dropHighlight == PXListViewDropOn)
 	{
 		[[NSColor alternateSelectedControlColor] set];
 		NSRect		theBox = [self bounds];

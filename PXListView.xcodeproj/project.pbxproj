@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		D25DDA7F133F58A20086783B /* PXListView+UserInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = D25DDA7E133F58A10086783B /* PXListView+UserInteraction.m */; };
 		D26669CB11B1B2F1007597F1 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D26669CA11B1B2F1007597F1 /* AppDelegate.m */; };
 		D26669D211B1B302007597F1 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D26669CE11B1B302007597F1 /* InfoPlist.strings */; };
 		D26669D311B1B302007597F1 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = D26669D011B1B302007597F1 /* MainMenu.xib */; };
@@ -29,6 +30,8 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		55B9AC9E11EA384C00416532 /* PXListViewDropHighlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PXListViewDropHighlight.h; path = Classes/PXListViewDropHighlight.h; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* PXListView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PXListView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D25DDA7D133F58A10086783B /* PXListView+UserInteraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "PXListView+UserInteraction.h"; path = "Classes/PXListView+UserInteraction.h"; sourceTree = "<group>"; };
+		D25DDA7E133F58A10086783B /* PXListView+UserInteraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "PXListView+UserInteraction.m"; path = "Classes/PXListView+UserInteraction.m"; sourceTree = "<group>"; };
 		D26669C911B1B2F1007597F1 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
 		D26669CA11B1B2F1007597F1 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
 		D26669CC11B1B2F8007597F1 /* PXListView-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PXListView-Info.plist"; path = "Resources/PXListView-Info.plist"; sourceTree = "<group>"; };
@@ -126,11 +129,9 @@
 				D27858D111B1B5EA00F1CF30 /* PXListView.m */,
 				D279A64311B4E95600771B2A /* PXListView+Private.h */,
 				D27858D711B1B6D400F1CF30 /* PXListViewDelegate.h */,
+				D25DDA7D133F58A10086783B /* PXListView+UserInteraction.h */,
+				D25DDA7E133F58A10086783B /* PXListView+UserInteraction.m */,
 				D279A68911B4ECAB00771B2A /* Cells */,
-				55B9AC9E11EA384C00416532 /* PXListViewDropHighlight.h */,
-				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
-				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
-				D279A6DD11B4EFCD00771B2A /* PXListViewCell+Private.h */,
 				D278592911B1BA7900F1CF30 /* Misc */,
 			);
 			name = PXListView;
@@ -170,6 +171,10 @@
 		D279A68911B4ECAB00771B2A /* Cells */ = {
 			isa = PBXGroup;
 			children = (
+				55B9AC9E11EA384C00416532 /* PXListViewDropHighlight.h */,
+				D27858D311B1B5FC00F1CF30 /* PXListViewCell.h */,
+				D27858D411B1B5FC00F1CF30 /* PXListViewCell.m */,
+				D279A6DD11B4EFCD00771B2A /* PXListViewCell+Private.h */,
 			);
 			name = Cells;
 			sourceTree = "<group>";
@@ -241,6 +246,7 @@
 				D27858D511B1B5FC00F1CF30 /* PXListViewCell.m in Sources */,
 				D278592411B1BA6C00F1CF30 /* PXListDocumentView.m in Sources */,
 				D278597011B1BBE800F1CF30 /* MyListViewCell.m in Sources */,
+				D25DDA7F133F58A20086783B /* PXListView+UserInteraction.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

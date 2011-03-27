@@ -21,9 +21,11 @@
 	PXListViewDropHighlight	_dropHighlight;
 }
 
-@property (readonly) NSString *reusableIdentifier;
 @property (nonatomic, assign) PXListView *listView;
+
+@property (readonly, copy) NSString *reusableIdentifier;
 @property (readonly) NSUInteger row;
+
 @property (readonly,getter=isSelected) BOOL selected;
 @property (assign) PXListViewDropHighlight dropHighlight;
 
