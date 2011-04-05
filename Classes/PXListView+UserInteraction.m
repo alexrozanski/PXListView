@@ -158,7 +158,7 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 - (void)handleMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
     //Send a double click delegate message if the row has been double clicked
-    if([event clickCount]>1) {
+    if([theEvent clickCount]>1) {
         if([[self delegate] respondsToSelector:@selector(listView:rowDoubleClicked:)]) {
             [[self delegate] listView:self rowDoubleClicked:[theCell row]];
         }
