@@ -157,54 +157,61 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (void)handleMouseDown:(NSEvent*)theEvent inCell:(PXListViewCell*)theCell // Central funnel for cell clicks so cells don't have to know about multi-selection, modifiers etc.
 {
-	// theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
-	[[self window] makeFirstResponder:self];
-	
-	BOOL		tryDraggingAgain = YES;
-	BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) || ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
-	BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
-	NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
-	
-	// If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
-	if( theEvent && isSelected && [self attemptDragWithMouseDown: theEvent inCell: theCell] )
-		return;
-	
-	if( _allowsMultipleSelection )
-	{
-		if( isSelected && shouldToggle )
-		{
-			if( [_selectedRows count] == 1 && !_allowsEmptySelection )
-				return;
-			[self deselectRowIndexes: clickedIndexSet];
-		}
-		else if( !isSelected && shouldToggle )
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
-		else if( !isSelected && !shouldToggle )
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-		else if( isSelected && !shouldToggle && [_selectedRows count] != 1 )
-		{
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-			tryDraggingAgain = NO;
-		}
-	}
-	else if( shouldToggle && _allowsEmptySelection )
-	{
-		if( isSelected )
-		{
-			[self deselectRowIndexes: clickedIndexSet];
-			tryDraggingAgain = NO;
-		}
-		else
-			[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-	}
-	else
-	{
-		[self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
-	}
-	
-	// If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
-	if( tryDraggingAgain && theEvent && [_selectedRows containsIndex: [theCell row]] )
-		[self attemptDragWithMouseDown: theEvent inCell: theCell];
+    //Send a double click delegate message if the row has been double clicked
+    if([event clickCount]>1) {
+        if([[self delegate] respondsToSelector:@selector(listView:rowDoubleClicked:)]) {
+            [[self delegate] listView:self rowDoubleClicked:[theCell row]];
+        }
+    }
+    
+    // theEvent is NIL if we get a "press" action from accessibility. In that case, try to toggle, so users can selectively turn on/off an item.
+    [[self window] makeFirstResponder:self];
+    
+    BOOL		tryDraggingAgain = YES;
+    BOOL		shouldToggle = theEvent == nil || ([theEvent modifierFlags] & NSCommandKeyMask) || ([theEvent modifierFlags] & NSShiftKeyMask);	// +++ Shift should really be a continuous selection.
+    BOOL		isSelected = [_selectedRows containsIndex: [theCell row]];
+    NSIndexSet	*clickedIndexSet = [NSIndexSet indexSetWithIndex: [theCell row]];
+    
+    // If a cell is already selected, we can drag it out, in which case we shouldn't toggle it:
+    if( theEvent && isSelected && [self attemptDragWithMouseDown: theEvent inCell: theCell] )
+        return;
+    
+    if( _allowsMultipleSelection )
+    {
+        if( isSelected && shouldToggle )
+        {
+            if( [_selectedRows count] == 1 && !_allowsEmptySelection )
+                return;
+            [self deselectRowIndexes: clickedIndexSet];
+        }
+        else if( !isSelected && shouldToggle )
+            [self selectRowIndexes: clickedIndexSet byExtendingSelection: YES];
+        else if( !isSelected && !shouldToggle )
+            [self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+        else if( isSelected && !shouldToggle && [_selectedRows count] != 1 )
+        {
+            [self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+            tryDraggingAgain = NO;
+        }
+    }
+    else if( shouldToggle && _allowsEmptySelection )
+    {
+        if( isSelected )
+        {
+            [self deselectRowIndexes: clickedIndexSet];
+            tryDraggingAgain = NO;
+        }
+        else
+            [self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+    }
+    else
+    {
+        [self selectRowIndexes: clickedIndexSet byExtendingSelection: NO];
+    }
+    
+    // If a user selects a cell, they need to be able to drag it off right away, so check for that case here:
+    if( tryDraggingAgain && theEvent && [_selectedRows containsIndex: [theCell row]] )
+        [self attemptDragWithMouseDown: theEvent inCell: theCell];
 }
 
 
