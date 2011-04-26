@@ -595,23 +595,54 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 - (void)viewWillStartLiveResize
 {
     _widthPriorToResize = NSWidth([self contentViewRect]);
+    if([self usesLiveResize])
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowSizing:) name:NSSplitViewDidResizeSubviewsNotification object:self.superview];
+}
+-(void)layoutCellsForResizeEvent 
+{
+    //Change the layout of the cells
+    [_visibleCells removeAllObjects];
+    [[self documentView] setSubviews:[NSArray array]];
+    
+    [self cacheCellLayout];
+    [self addCellsFromVisibleRange];
+    
+    if ([_delegate conformsToProtocol:@protocol(PXListViewDelegate)])
+    {
+        CGFloat totalHeight = 0;
+        
+        for (NSUInteger i = 0; i < _numberOfRows; i++)
+        {
+            CGFloat cellHeight = [_delegate listView:self heightOfRow:i];
+            totalHeight += cellHeight +[self cellSpacing];
+        }
+        
+        _totalHeight = totalHeight;
+        
+        NSRect bounds = [self bounds];
+        CGFloat documentHeight = _totalHeight > NSHeight(bounds) ? _totalHeight:(NSHeight(bounds) - 2);
+        
+        [[self documentView] setFrame:NSMakeRect(0.0f, 0.0f, NSWidth([self contentViewRect]), documentHeight)];
+    }
+    
+    _currentRange = [self visibleRange];
+}
+-(void)viewDidEndLiveResize
+{
+    [super viewDidEndLiveResize];
+    
+    //If we use live resize the view will already be up to date
+    if (![self usesLiveResize])
+    {
+        [self layoutCellsForResizeEvent];
+    }
+    if ([self usesLiveResize])
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSSplitViewDidResizeSubviewsNotification object:self.superview];
 }
 
-- (void)viewDidEndLiveResize
+-(void)windowSizing:(NSNotification *)inNot
 {
-	[super viewDidEndLiveResize];
-	
-    //If we use live resize the view will already be up to date
-    if(![self usesLiveResize]) {
-        //Change the layout of the cells
-        [_visibleCells removeAllObjects];
-        [[self documentView] setSubviews:[NSArray array]];
-        
-        [self cacheCellLayout];
-        [self addCellsFromVisibleRange];
-        
-        _currentRange = [self visibleRange];
-    }
+    [self layoutCellsForResizeEvent];
 }
 
 #pragma mark -
