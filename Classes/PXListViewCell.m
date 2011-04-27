@@ -144,6 +144,14 @@
 	_dropHighlight = PXListViewDropNowhere;
 }
 
+
+#pragma mark layout
+
+-(void)layoutSubviews;
+{
+    
+}
+
 #pragma mark -
 #pragma mark Accessibility
 

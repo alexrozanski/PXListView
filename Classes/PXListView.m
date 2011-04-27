@@ -106,6 +106,13 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
     }
 }
 
+-(void)reloadRowAtIndex:(NSInteger)inIndex;
+{
+    [self cacheCellLayout];
+    [self layoutCells];
+    //[self layoutCellsForResizeEvent];
+}
+
 - (void)reloadData
 {
 	id <PXListViewDelegate> delegate = [self delegate];
@@ -233,6 +240,11 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 	}
 	
 	return outCell;
+}
+
+-(PXListViewCell *)cellForRowAtIndex:(NSUInteger)inIndex
+{
+    return [self visibleCellForRow:inIndex];
 }
 
 - (NSArray*)visibleCellsForRowIndexes:(NSIndexSet*)rows
@@ -494,6 +506,7 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 	{
 		NSInteger row = [cell row];
 		[cell setFrame:[self rectOfRow:row]];
+        [cell layoutSubviews];
 	}
 	
 	NSRect bounds = [self bounds];
@@ -598,6 +611,7 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
     if([self usesLiveResize])
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowSizing:) name:NSSplitViewDidResizeSubviewsNotification object:self.superview];
 }
+
 -(void)layoutCellsForResizeEvent 
 {
     //Change the layout of the cells
@@ -627,6 +641,7 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
     
     _currentRange = [self visibleRange];
 }
+
 -(void)viewDidEndLiveResize
 {
     [super viewDidEndLiveResize];

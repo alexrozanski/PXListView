@@ -35,4 +35,6 @@
 - (id)initWithReusableIdentifier:(NSString*)identifier;
 - (void)prepareForReuse;
 
+-(void)layoutSubviews;
+
 @end

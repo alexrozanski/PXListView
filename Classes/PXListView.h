@@ -60,10 +60,13 @@
 @property (nonatomic, assign) BOOL usesLiveResize;
 
 - (void)reloadData;
+-(void)reloadRowAtIndex:(NSInteger)inIndex;
 
 - (PXListViewCell*)dequeueCellWithReusableIdentifier:(NSString*)identifier;
 
 - (NSArray*)visibleCells;
+-(PXListViewCell *)cellForRowAtIndex:(NSUInteger)inIndex;
+
 - (NSRange)visibleRange;
 - (NSRect)rectOfRow:(NSUInteger)row;
 - (void)deselectRows;

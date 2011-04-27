@@ -218,8 +218,8 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 - (void)handleMouseDownOutsideCells: (NSEvent*)theEvent
 {
 #pragma unused(theEvent)
-	[[self window] makeFirstResponder: self];
-    
+    //[[self window] makeFirstResponder: self];
+    //
 	if( _allowsEmptySelection )
 		[self deselectRows];
 	else if( _numberOfRows > 1 )
@@ -336,7 +336,6 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 -(NSUInteger)	indexOfRowAtPoint: (NSPoint)pos returningProposedDropHighlight: (PXListViewDropHighlight*)outDropHighlight
 {
-	PXLog( @"====================" );
 	*outDropHighlight = PXListViewDropOn;
 	
 	if( _numberOfRows > 0 )
@@ -346,14 +345,12 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 		{
 			if( _cellYOffsets[x] > pos.y )
 			{
-				PXLog( @"cellYOffset[%ld] = %f > %f", x, _cellYOffsets[x], pos.y );
 				break;
 			}
 			
 			idx = x;
 		}
 		
-		PXLog( @"idx = %ld", idx );
 		
 		CGFloat		cellHeight = 0,
         cellOffset = 0,
@@ -363,8 +360,6 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			cellOffset = _cellYOffsets[idx];
 			nextCellOffset = _cellYOffsets[idx+1];
 			cellHeight = nextCellOffset -cellOffset;
-			if( cellHeight < 0 )
-				PXLog( @"Urk. (1)" );
 		}
 		else if( idx < _numberOfRows && _numberOfRows > 0 )	// drag is somewhere close to or beyond end of list.
 		{
@@ -372,8 +367,6 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			cellHeight = [theCell frame].size.height;
 			cellOffset = [theCell frame].origin.y;
 			nextCellOffset = cellOffset +cellHeight;
-			if( cellHeight < 0 )
-				PXLog( @"Urk. (2)" );
 		}
 		else if( idx >= _numberOfRows && _numberOfRows > 0 )	// drag is somewhere close to or beyond end of list.
 		{
@@ -381,24 +374,17 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			cellOffset = [[self documentView] frame].size.height;
 			nextCellOffset = cellOffset;
 			idx = NSUIntegerMax;
-			if( cellHeight < 0 )
-				PXLog( @"Urk. (3)" );
 		}
         
-		PXLog( @"cellHeight = %f", cellHeight );
 		if( pos.y < (cellOffset +(cellHeight / 6.0)) )
 		{
 			*outDropHighlight = PXListViewDropAbove;
-			PXLog( @"*** ABOVE %ld", idx );
 		}
 		else if( pos.y > (nextCellOffset -(cellHeight / 6.0)) )
 		{
 			idx++;
 			*outDropHighlight = PXListViewDropAbove;
-			PXLog( @"*** ABOVE %ld (below %d)", idx, idx -1 );
 		}
-		else
-			PXLog( @"*** ON %ld", idx );
 		
 		if( idx > _numberOfRows )
 			idx = NSUIntegerMax;
@@ -407,7 +393,6 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	}
 	else
 	{
-		PXLog( @"*** ON %d", NSUIntegerMax );
 		return NSUIntegerMax;
 	}
 }
@@ -433,8 +418,6 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-	PXLog( @"draggingEntered" );
-	
 	NSDragOperation	theOperation = NSDragOperationNone;
 	
 	NSUInteger				oldDropRow = _dropRow;
@@ -443,14 +426,11 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
 	{
 		NSPoint		dragMouse = [[self documentView] convertPoint: [sender draggingLocation] fromView: nil];
-		PXLog( @"dragMouse = %@", NSStringFromPoint(dragMouse) );
 		_dropRow = [self indexOfRowAtPoint: dragMouse returningProposedDropHighlight: &_dropHighlight];
 		
 		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
                      proposedDropHighlight: _dropHighlight];
 	}
-    
-	PXLog( @"op = %lu, row = %ld, hl = %lu", theOperation, _dropRow, _dropHighlight );
 	
 	if( theOperation != NSDragOperationNone )
 	{
@@ -463,14 +443,9 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			[oldCell setDropHighlight: PXListViewDropNowhere];
 			[newCell setDropHighlight: _dropHighlight];
 			PXListViewDropHighlight	dropHL = ((_dropRow == _numberOfRows) ? PXListViewDropAbove : PXListViewDropOn);
-			PXLog( @"TOTAL DROP %s", dropHL == PXListViewDropOn ? "on" : "above" );
 			[[self documentView] setDropHighlight: dropHL];
 		}
-		else
-			PXLog(@"TOTAL DROP unchanged");
 	}
-	else
-		PXLog( @"TOTAL DROP NOWHERE" );
 	
 	return theOperation;
 }
@@ -478,8 +453,6 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender /* if the destination responded to draggingEntered: but not to draggingUpdated: the return value from draggingEntered: is used */
 {
-	PXLog( @"draggingUpdated" );
-	
 	NSDragOperation	theOperation = NSDragOperationNone;
 	
 	NSUInteger				oldDropRow = _dropRow;
@@ -488,14 +461,11 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 	if( [_delegate respondsToSelector: @selector(listView:validateDrop:proposedRow:proposedDropHighlight:)] )
 	{
 		NSPoint		dragMouse = [[self documentView] convertPoint: [sender draggingLocation] fromView: nil];
-		PXLog( @"dragMouse = %@", NSStringFromPoint(dragMouse) );
 		_dropRow = [self indexOfRowAtPoint: dragMouse returningProposedDropHighlight: &_dropHighlight];
 		
 		theOperation = [_delegate listView: self validateDrop: sender proposedRow: _dropRow
                      proposedDropHighlight: _dropHighlight];
 	}
-	
-	NSLog( @"op = %lu, row = %ld, hl = %lu", theOperation, _dropRow, _dropHighlight );
 	
 	if( theOperation != NSDragOperationNone )
 	{
@@ -508,15 +478,11 @@ static PXIsDragStartResult PXIsDragStart( NSEvent *startEvent, NSTimeInterval th
 			[oldCell setDropHighlight: PXListViewDropNowhere];
 			[newCell setDropHighlight: _dropHighlight];
 			PXListViewDropHighlight	dropHL = ((_dropRow == _numberOfRows) ? PXListViewDropAbove : PXListViewDropOn);
-			NSLog( @"TOTAL DROP %s", dropHL == PXListViewDropOn ? "on" : "above" );
 			[[self documentView] setDropHighlight: dropHL];
 		}
-		else
-			PXLog(@"TOTAL DROP unchanged");
 	}
 	else
 	{
-		PXLog( @"TOTAL DROP NOWHERE" );
 		[self setShowsDropHighlight: NO];
 	}
 	
