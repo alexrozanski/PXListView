@@ -72,6 +72,7 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 
 - (void)dealloc
 {
+	[self setDelegate:nil]; // otherwise delegate is left observing notifications from deallocated PXListView
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	
 	[_reusableCells release], _reusableCells = nil;
