@@ -155,9 +155,12 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 
 -(void)enqueueCell:(PXListViewCell*)cell
 {
-	[_reusableCells addObject:cell];
-	[_visibleCells removeObject:cell];
-	[cell setHidden:YES];
+	if (cell != nil)
+	{
+		[_reusableCells addObject:cell];
+		[_visibleCells removeObject:cell];
+		[cell setHidden:YES];
+	}
 }
 
 - (PXListViewCell*)dequeueCellWithReusableIdentifier: (NSString*)identifier
