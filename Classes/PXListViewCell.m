@@ -22,7 +22,6 @@
 @synthesize reusableIdentifier = _reusableIdentifier;
 @synthesize listView = _listView;
 @synthesize row = _row;
-@synthesize dropHighlight = _dropHighlight;
 
 + (id)cellLoadedFromNibNamed:(NSString*)nibName reusableIdentifier:(NSString*)identifier
 {
@@ -105,6 +104,10 @@
 	[self setNeedsDisplay:YES];
 }
 
+-(PXListViewDropHighlight)dropHighlight
+{
+	return _dropHighlight;
+}
 
 - (void)drawRect:(NSRect)dirtyRect
 {

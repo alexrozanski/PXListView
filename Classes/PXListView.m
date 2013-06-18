@@ -155,9 +155,12 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 
 -(void)enqueueCell:(PXListViewCell*)cell
 {
-	[_reusableCells addObject:cell];
-	[_visibleCells removeObject:cell];
-	[cell setHidden:YES];
+	if (cell != nil)
+	{
+		[_reusableCells addObject:cell];
+		[_visibleCells removeObject:cell];
+		[cell setHidden:YES];
+	}
 }
 
 - (PXListViewCell*)dequeueCellWithReusableIdentifier: (NSString*)identifier
@@ -317,7 +320,8 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 		{
 			for(NSUInteger i = visibleRange.location; i > _currentRange.location; i--)
 			{
-				[self enqueueCell:[_visibleCells objectAtIndex:0]];
+				if ([_visibleCells count])
+					[self enqueueCell:[_visibleCells objectAtIndex:0]];
 			}
 		}
 		
@@ -567,8 +571,8 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 	
 	NSPoint newScrollPoint = rowRect.origin;
     
-    //Have we over-scrolled?
-	if(NSMaxY(rowRect) > NSMaxY(visibleRect)) {
+    //Could we over-scroll?
+	if(NSMaxY(rowRect) > _totalHeight) {
 		newScrollPoint.y = _totalHeight - NSHeight(visibleRect);
     }
 	
@@ -592,8 +596,8 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 	
 	NSPoint newScrollPoint = rowRect.origin;
     
-    //Have we over-scrolled?
-	if(NSMaxY(rowRect) > NSMaxY(visibleRect)) {
+    //Could we over-scroll?
+	if(NSMaxY(rowRect) > _totalHeight) {
 		newScrollPoint.y = _totalHeight - NSHeight(visibleRect);
     }
 	
