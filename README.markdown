@@ -43,7 +43,7 @@ You can also load cells from NIBs easily, by using `PXListViewCell`'s class meth
 `PXListView` has a property, `usesLiveResize` which determines whether the control should be updated continuously during a resize or not. By default, the cells will be updated continuously as the control is resized. Although visually preferable, especially when dealing with large data sets, this can cause the UI to become slow, so this can be turned off by setting the property to `NO`.
 
 ###Optimizations###
-`PXListView` only keeps the bare minimum of list view cells in the view hierarchy to be performant, and when rows are scrolled onscreen new cells are added to the view hierarchy to display the rows, and when the rows are scrolled offscreen the associated cells are removed from the view hierarchy.
+`PXListView` only keeps in a view hierarchy the minimum of list view cells needed to be performant. When rows are scrolled, new cells are added to the view hierarchy, and a while after rows are scrolled offscreen, the associated cells are removed from the view hierarchy.
 
 Attributions
 ------------
