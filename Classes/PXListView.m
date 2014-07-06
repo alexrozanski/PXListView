@@ -36,7 +36,6 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 		_selectedRows = [[NSMutableIndexSet alloc] init];
 		_allowsEmptySelection = YES;
         _usesLiveResize = YES;
-        _cellYOffsets = NULL;
 	}
 	
 	return self;
@@ -51,7 +50,6 @@ NSString * const PXListViewSelectionDidChange = @"PXListViewSelectionDidChange";
 		_selectedRows = [[NSMutableIndexSet alloc] init];
 		_allowsEmptySelection = YES;
         _usesLiveResize = YES;
-        _cellYOffsets = NULL;
 	}
 	
 	return self;
